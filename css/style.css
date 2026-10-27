@@ -124,6 +124,10 @@ main { max-width: 600px; margin: 0 auto; padding: 16px 16px 48px; }
 .login h2 { margin: 14px 0 0; font-size: 1.4rem; }
 .login-texto { margin: 0 0 10px; color: var(--texto-suave); text-align: center; font-size: 0.92rem; }
 .login form { width: 100%; }
+.login-bloco { display: grid; justify-items: center; gap: 6px; width: 100%; }
+.login-bloco[hidden] { display: none; }
+.primeiro-acesso { width: 100%; margin-top: 10px; }
+.grade.grade-municipio { grid-template-columns: 1fr 88px; }
 .senha { position: relative; display: block; }
 .senha input { padding-right: 52px; }
 .ver-senha {

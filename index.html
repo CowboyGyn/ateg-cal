@@ -27,9 +27,11 @@
     <section id="tela-login" class="tela" hidden>
       <div class="login">
         <img class="login-logo" src="icons/logo-280.png" alt="ATeG Cal — Calculadora zootécnica" width="150" height="150">
-        <h2>Entrar</h2>
-        <p class="login-texto">Use o celular e a senha cadastrados na Zootécnica ATeG.</p>
-        <form id="formLogin" class="cartao" novalidate>
+
+        <div id="blocoEntrar" class="login-bloco">
+          <h2>Entrar</h2>
+          <p class="login-texto">Use o celular e a senha cadastrados na Zootécnica ATeG.</p>
+          <form id="formLogin" class="cartao" novalidate>
           <label class="campo">
             <span>Celular</span>
             <input name="celular" type="tel" inputmode="tel" autocomplete="tel" placeholder="(62) 9 0000-0000" required>
@@ -38,15 +40,103 @@
             <span>Senha</span>
             <span class="senha">
               <input name="senha" type="password" autocomplete="current-password" required>
-              <button type="button" id="btnVerSenha" class="ver-senha" aria-label="Mostrar senha" aria-pressed="false">
+              <button type="button" class="ver-senha" aria-label="Mostrar senha" aria-pressed="false">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="risco" d="M4 4l16 16"/></svg>
               </button>
             </span>
           </label>
           <p id="erroLogin" class="erro" role="alert" hidden></p>
-          <button type="submit" class="primario" id="btnEntrar">Entrar</button>
+          <button type="submit" class="primario">Entrar</button>
           <button type="button" id="btnEsqueci" class="link">Esqueci a senha</button>
-        </form>
+          </form>
+          <button type="button" id="btnPrimeiroAcesso" class="secundario primeiro-acesso">Primeiro acesso? Cadastre-se</button>
+        </div>
+
+        <div id="blocoCadastro" class="login-bloco" hidden>
+          <h2>Primeiro acesso</h2>
+          <p class="login-texto">Preencha seus dados. O acesso é liberado na hora.</p>
+          <form id="formCadastro" class="cartao" novalidate>
+          <label class="campo">
+            <span>Nome completo</span>
+            <input name="nome" type="text" autocomplete="name" autocapitalize="words" maxlength="80" required>
+          </label>
+          <label class="campo">
+            <span>Celular (WhatsApp)</span>
+            <input name="celular" type="tel" inputmode="tel" autocomplete="tel" placeholder="(62) 9 0000-0000" required>
+          </label>
+          <label class="campo">
+            <span>E-mail</span>
+            <input name="email" type="email" inputmode="email" autocomplete="email" maxlength="100" required>
+          </label>
+          <div class="grade grade-municipio">
+            <label class="campo"><span>Município</span>
+              <input name="municipio" type="text" autocomplete="address-level2" autocapitalize="words" maxlength="60" required></label>
+            <label class="campo"><span>UF</span>
+              <select name="uf" autocomplete="address-level1">
+              <option>AC</option>
+              <option>AL</option>
+              <option>AP</option>
+              <option>AM</option>
+              <option>BA</option>
+              <option>CE</option>
+              <option>DF</option>
+              <option>ES</option>
+              <option selected>GO</option>
+              <option>MA</option>
+              <option>MT</option>
+              <option>MS</option>
+              <option>MG</option>
+              <option>PA</option>
+              <option>PB</option>
+              <option>PR</option>
+              <option>PE</option>
+              <option>PI</option>
+              <option>RJ</option>
+              <option>RN</option>
+              <option>RS</option>
+              <option>RO</option>
+              <option>RR</option>
+              <option>SC</option>
+              <option>SP</option>
+              <option>SE</option>
+              <option>TO</option>
+              </select></label>
+          </div>
+          <label class="campo">
+            <span>Função</span>
+            <select name="funcao" required>
+              <option value="" selected disabled>Selecione</option>
+              <option>Técnico de campo ATeG</option>
+              <option>Supervisor</option>
+              <option>Produtor rural</option>
+              <option>Zootecnista / Veterinário / Agrônomo</option>
+              <option>Estudante</option>
+              <option>Outro</option>
+            </select>
+          </label>
+          <label class="campo">
+            <span>Crie uma senha (mínimo 4 caracteres)</span>
+            <span class="senha">
+              <input name="senha" type="password" autocomplete="new-password" required>
+              <button type="button" class="ver-senha" aria-label="Mostrar senha" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="risco" d="M4 4l16 16"/></svg>
+              </button>
+            </span>
+          </label>
+          <label class="campo">
+            <span>Repita a senha</span>
+            <span class="senha">
+              <input name="confirmacao" type="password" autocomplete="new-password" required>
+              <button type="button" class="ver-senha" aria-label="Mostrar senha" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="risco" d="M4 4l16 16"/></svg>
+              </button>
+            </span>
+          </label>
+          <p id="erroCadastro" class="erro" role="alert" hidden></p>
+          <button type="submit" class="primario">Cadastrar e entrar</button>
+          </form>
+          <button type="button" id="btnJaTenho" class="link">Já tenho cadastro — Entrar</button>
+        </div>
       </div>
     </section>
 

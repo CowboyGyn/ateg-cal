@@ -1,14 +1,13 @@
-// Login pelo celular: confere celular e senha no Apps Script ligado à planilha de usuários
-// e guarda a sessão no aparelho, para o app seguir funcionando offline.
+// Login e cadastro (primeiro acesso) pelo celular: conversa com o Apps Script ligado à
+// planilha de usuários e guarda a sessão no aparelho, para o app seguir funcionando offline.
 import { LOGIN_URL, DIAS_SESSAO, WHATSAPP_SUPORTE } from "../config.js";
 import { $ } from "./comum.js";
 
 const CHAVE_SESSAO = "ateg-cal:sessao";
 const TEMPO_LIMITE_MS = 20000;
 
-const form = $("formLogin");
-const erro = $("erroLogin");
-const btnEntrar = $("btnEntrar");
+const formLogin = $("formLogin");
+const formCadastro = $("formCadastro");
 
 export const loginAtivo = () => LOGIN_URL !== "";
 
@@ -55,12 +54,7 @@ function formatarCelular(valor) {
   return `(${ddd}) ${resto.slice(0, 4)}-${resto.slice(4)}`;
 }
 
-function mostrarErro(msg) {
-  erro.textContent = msg;
-  erro.hidden = false;
-}
-
-async function enviarLogin(celular, senha) {
+async function chamarScript(dados) {
   const controle = new AbortController();
   const limite = setTimeout(() => controle.abort(), TEMPO_LIMITE_MS);
   try {
@@ -68,7 +62,7 @@ async function enviarLogin(celular, senha) {
     const resp = await fetch(LOGIN_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ acao: "login", celular, senha }),
+      body: JSON.stringify(dados),
       signal: controle.signal,
     });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -78,50 +72,130 @@ async function enviarLogin(celular, senha) {
   }
 }
 
-// aoEntrar(sessao) é chamado depois de um login bem-sucedido.
-export function iniciarLogin(aoEntrar) {
-  form.elements.celular.addEventListener("input", (e) => {
-    e.target.value = formatarCelular(e.target.value);
-  });
+// Envia ao script com o botão em "carregando"; trata erros de conexão e de resposta.
+async function enviar(form, dados, textoCarregando, aoConfirmar) {
+  const erro = form.querySelector(".erro");
+  const botao = form.querySelector("button[type=submit]");
+  const textoBotao = botao.textContent;
+  if (!navigator.onLine) {
+    return mostrarErro(erro, "Sem internet. O primeiro acesso precisa de conexão; depois o app funciona offline.");
+  }
+  botao.disabled = true;
+  botao.textContent = textoCarregando;
+  try {
+    // A primeira chamada ao Apps Script às vezes falha enquanto ele "acorda": tenta de novo uma vez.
+    // O cadastro não repete, para não duplicar a linha caso a primeira tenha sido gravada.
+    const r = dados.acao === "login"
+      ? await chamarScript(dados).catch(() => chamarScript(dados))
+      : await chamarScript(dados);
+    if (!r.ok) return mostrarErro(erro, r.erro || "Não foi possível concluir.");
+    aoConfirmar(r);
+  } catch {
+    mostrarErro(erro, "Não foi possível conectar. Verifique a internet e tente de novo.");
+  } finally {
+    botao.disabled = false;
+    botao.textContent = textoBotao;
+  }
+}
 
-  $("btnVerSenha").addEventListener("click", (e) => {
-    const campo = form.elements.senha;
-    const mostrar = campo.type === "password";
-    campo.type = mostrar ? "text" : "password";
-    e.currentTarget.setAttribute("aria-pressed", String(mostrar));
-    e.currentTarget.setAttribute("aria-label", mostrar ? "Esconder senha" : "Mostrar senha");
-    campo.focus();
+function mostrarErro(erro, msg) {
+  erro.textContent = msg;
+  erro.hidden = false;
+}
+
+function mostrarBloco(qual) {
+  $("blocoEntrar").hidden = qual !== "entrar";
+  $("blocoCadastro").hidden = qual !== "cadastro";
+  for (const erro of document.querySelectorAll("#tela-login .erro")) erro.hidden = true;
+  window.scrollTo(0, 0);
+}
+
+function limparFormularios() {
+  for (const form of [formLogin, formCadastro]) {
+    form.reset();
+    for (const campo of form.querySelectorAll(".senha input")) campo.type = "password";
+    for (const botao of form.querySelectorAll(".ver-senha")) botao.setAttribute("aria-pressed", "false");
+  }
+}
+
+// aoEntrar(sessao) é chamado depois de um login ou cadastro bem-sucedido.
+export function iniciarLogin(aoEntrar) {
+  for (const campo of document.querySelectorAll('#tela-login input[type="tel"]')) {
+    campo.addEventListener("input", (e) => {
+      e.target.value = formatarCelular(e.target.value);
+    });
+  }
+
+  // Botão de olho: mostra ou esconde a senha do campo ao lado.
+  for (const botao of document.querySelectorAll("#tela-login .ver-senha")) {
+    botao.addEventListener("click", (e) => {
+      e.preventDefault();
+      const campo = botao.parentElement.querySelector("input");
+      const mostrar = campo.type === "password";
+      campo.type = mostrar ? "text" : "password";
+      botao.setAttribute("aria-pressed", String(mostrar));
+      botao.setAttribute("aria-label", mostrar ? "Esconder senha" : "Mostrar senha");
+      campo.focus();
+    });
+  }
+
+  $("btnPrimeiroAcesso").addEventListener("click", () => {
+    // Aproveita o celular já digitado no login.
+    if (!formCadastro.elements.celular.value) formCadastro.elements.celular.value = formLogin.elements.celular.value;
+    mostrarBloco("cadastro");
+    formCadastro.elements.nome.focus();
   });
+  $("btnJaTenho").addEventListener("click", () => mostrarBloco("entrar"));
 
   $("btnEsqueci").addEventListener("click", () => {
-    const celular = form.elements.celular.value.trim();
+    const celular = formLogin.elements.celular.value.trim();
     const texto = `Olá! Esqueci minha senha do ATeG Cal.${celular ? ` Meu celular cadastrado é ${celular}.` : ""}`;
     window.open(`https://wa.me/${WHATSAPP_SUPORTE}?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
   });
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    erro.hidden = true;
-    const celular = form.elements.celular.value.trim();
-    const senha = form.elements.senha.value;
-    if (celular.replace(/\D/g, "").length < 10) return mostrarErro("Informe o celular com DDD.");
-    if (!senha) return mostrarErro("Informe a senha.");
-    if (!navigator.onLine) return mostrarErro("Sem internet. O primeiro acesso precisa de conexão; depois o app funciona offline.");
+  const concluir = (nome, celular) => {
+    limparFormularios();
+    mostrarBloco("entrar");
+    aoEntrar(salvarSessao(nome, celular));
+  };
 
-    btnEntrar.disabled = true;
-    btnEntrar.textContent = "Entrando…";
-    try {
-      // A primeira chamada ao Apps Script às vezes falha enquanto ele "acorda": tenta de novo uma vez.
-      const r = await enviarLogin(celular, senha).catch(() => enviarLogin(celular, senha));
-      if (!r.ok) return mostrarErro(r.erro || "Celular ou senha incorretos.");
-      form.reset();
-      form.elements.senha.type = "password";
-      aoEntrar(salvarSessao(r.nome || "", celular));
-    } catch {
-      mostrarErro("Não foi possível conectar. Verifique a internet e tente de novo.");
-    } finally {
-      btnEntrar.disabled = false;
-      btnEntrar.textContent = "Entrar";
-    }
+  formLogin.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const erro = $("erroLogin");
+    erro.hidden = true;
+    const celular = formLogin.elements.celular.value.trim();
+    const senha = formLogin.elements.senha.value;
+    if (celular.replace(/\D/g, "").length < 10) return mostrarErro(erro, "Informe o celular com DDD.");
+    if (!senha) return mostrarErro(erro, "Informe a senha.");
+    enviar(formLogin, { acao: "login", celular, senha }, "Entrando…", (r) => concluir(r.nome || "", celular));
+  });
+
+  formCadastro.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const erro = $("erroCadastro");
+    erro.hidden = true;
+    const f = formCadastro.elements;
+    const dados = {
+      acao: "cadastro",
+      nome: f.nome.value.trim(),
+      celular: f.celular.value.trim(),
+      email: f.email.value.trim(),
+      municipio: f.municipio.value.trim(),
+      uf: f.uf.value,
+      funcao: f.funcao.value,
+      senha: f.senha.value,
+    };
+    const falha = (msg, campo) => {
+      mostrarErro(erro, msg);
+      f[campo].focus();
+    };
+    if (dados.nome.split(" ").filter(Boolean).length < 2) return falha("Informe o nome completo.", "nome");
+    if (dados.celular.replace(/\D/g, "").length < 10) return falha("Informe o celular com DDD.", "celular");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dados.email)) return falha("Informe um e-mail válido.", "email");
+    if (!dados.municipio) return falha("Informe o município.", "municipio");
+    if (!dados.funcao) return falha("Selecione a função.", "funcao");
+    if (dados.senha.length < 4) return falha("A senha deve ter pelo menos 4 caracteres.", "senha");
+    if (dados.senha !== f.confirmacao.value) return falha("As senhas não conferem.", "confirmacao");
+    enviar(formCadastro, dados, "Cadastrando…", (r) => concluir(r.nome || dados.nome, dados.celular));
   });
 }

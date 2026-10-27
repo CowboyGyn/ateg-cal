@@ -38,6 +38,17 @@ histórico e publique em **Implantar → Gerenciar implantações → editar →
 Para conferir qual versão está no ar, abra o endereço `/exec` no navegador: aparece
 `{"ok":true,"servico":"ATeG Cal login","versao":"1.0.0"}`.
 
+## Primeiro acesso (cadastro pelo app) — versão 1.1.0
+
+- Quem toca em "Primeiro acesso? Cadastre-se" informa nome, celular, e-mail, município/UF,
+  função e senha. O script grava uma linha nova com Ativo = `sim` (liberado na hora).
+- As colunas que faltarem (Ativo, Município, UF, E-mail, Função, Cadastro em) são criadas
+  sozinhas no fim da linha 1 no primeiro cadastro.
+- Celular já cadastrado é recusado ("use Entrar ou Esqueci a senha").
+- A cada cadastro você recebe um e-mail. Para isso, depois de colar a versão nova, rode
+  `testarLeitura` uma vez no editor e autorize o **envio de e-mail**.
+- Para bloquear alguém: troque a coluna Ativo dessa pessoa para `não`.
+
 ## Como funciona
 
 - O login vale por 30 dias no aparelho (`DIAS_SESSAO` em `js/config.js`), inclusive offline.

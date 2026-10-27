@@ -1,0 +1,47 @@
+# Login do ATeG Cal com a planilha do Google
+
+O app não lê a planilha diretamente. Um pequeno script (Apps Script) roda na sua conta
+Google, confere celular e senha e responde só "ok + nome" ou "erro". Assim as senhas
+nunca chegam ao celular de ninguém.
+
+## 1. Planilha
+
+Linha 1 com os cabeçalhos (qualquer ordem):
+
+| Nome | Celular | Senha | Ativo (opcional) |
+|------|---------|-------|------------------|
+| Fulano de Tal | (62) 9 9999-0000 | 1234 | sim |
+
+- O celular pode estar escrito de qualquer jeito: `(62) 9 9999-0000`, `62999990000` e `5562999990000` funcionam.
+- Formate a coluna **Senha como texto simples** (Formatar → Número → Texto simples), senão uma senha como `0123` vira `123`.
+- Na coluna **Ativo**, escreva `não` para bloquear alguém sem apagar a linha.
+- **Importante:** deixe o compartilhamento da planilha como **Restrito** (só você). O script acessa com a sua conta; ninguém mais precisa do link.
+
+## 2. Criar o script
+
+1. Abra a planilha → **Extensões → Apps Script**.
+2. Apague o conteúdo e cole todo o arquivo `Codigo.gs` desta pasta. Salve.
+3. No topo, escolha a função `testarLeitura` e clique em **Executar**. Autorize o acesso (a tela "app não verificado" é normal: clique em *Avançado → Acessar*).
+
+## 3. Publicar
+
+1. **Implantar → Nova implantação** → tipo **App da Web**.
+2. *Executar como:* **Eu**. *Quem pode acessar:* **Qualquer pessoa**.
+3. Clique em **Implantar** e copie o endereço que termina em `/exec`.
+4. No app, abra `js/config.js` e cole o endereço em `LOGIN_URL`.
+5. Em `sw.js`, aumente a versão (`ateg-cal-vN`) para os celulares receberem a mudança.
+
+Se alterar o `Codigo.gs` depois: aumente `VERSAO` no topo do arquivo, anote a mudança no
+histórico e publique em **Implantar → Gerenciar implantações → editar → Nova versão**
+(o endereço continua o mesmo).
+
+Para conferir qual versão está no ar, abra o endereço `/exec` no navegador: aparece
+`{"ok":true,"servico":"ATeG Cal login","versao":"1.0.0"}`.
+
+## Como funciona
+
+- O login vale por 30 dias no aparelho (`DIAS_SESSAO` em `js/config.js`), inclusive offline.
+- Após 5 senhas erradas, aquele celular fica bloqueado por 15 minutos.
+- "Esqueci a senha" abre o WhatsApp de suporte com uma mensagem pronta; a senha é
+  conferida e informada por você.
+- Quem for desativado ou trocar de senha continua com acesso até a sessão de 30 dias vencer.

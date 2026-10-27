@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Calculadora de indicadores zootécnicos e econômicos para ATeG.">
+  <meta name="theme-color" content="#06200f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ATeG Cal">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>ATeG Cal</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon-64.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topo">
+    <button class="voltar" id="btnVoltar" type="button" aria-label="Voltar" hidden>&#8592;</button>
+    <img class="topo-logo" src="icons/logo-96.png" alt="" width="36" height="36">
+    <h1 id="tituloTela">ATeG Cal</h1>
+    <span id="seloOffline" class="selo-offline" hidden>Offline</span>
+  </header>
+
+  <main>
+    <!-- Login pelo celular -->
+    <section id="tela-login" class="tela" hidden>
+      <div class="login">
+        <img class="login-logo" src="icons/logo-280.png" alt="ATeG Cal — Calculadora zootécnica" width="150" height="150">
+        <h2>Entrar</h2>
+        <p class="login-texto">Use o celular e a senha cadastrados na Zootécnica ATeG.</p>
+        <form id="formLogin" class="cartao" novalidate>
+          <label class="campo">
+            <span>Celular</span>
+            <input name="celular" type="tel" inputmode="tel" autocomplete="tel" placeholder="(62) 9 0000-0000" required>
+          </label>
+          <label class="campo">
+            <span>Senha</span>
+            <span class="senha">
+              <input name="senha" type="password" autocomplete="current-password" required>
+              <button type="button" id="btnVerSenha" class="ver-senha" aria-label="Mostrar senha" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="risco" d="M4 4l16 16"/></svg>
+              </button>
+            </span>
+          </label>
+          <p id="erroLogin" class="erro" role="alert" hidden></p>
+          <button type="submit" class="primario" id="btnEntrar">Entrar</button>
+          <button type="button" id="btnEsqueci" class="link">Esqueci a senha</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Tela inicial: módulos -->
+    <section id="tela-inicio" class="tela">
+      <div class="capa">
+        <img src="icons/logo-280.png" alt="ATeG Cal — Calculadora zootécnica" width="140" height="140">
+        <div>
+          <p class="capa-titulo">Calculadora zootécnica</p>
+          <p class="capa-texto">Indicadores zootécnicos e econômicos para leite e corte, direto no campo.</p>
+          <p id="capaOffline" class="capa-selo" hidden>&#10003; Pronto para usar sem internet</p>
+          <p id="capaUsuario" class="capa-usuario" hidden>
+            Olá, <b id="nomeUsuario"></b> · <button type="button" id="btnSair" class="link link-claro">Sair</button>
+          </p>
+        </div>
+      </div>
+
+      <h2 class="secao">Módulos</h2>
+      <nav class="modulos">
+        <a class="modulo leite" href="#/rebanho-leite">
+          <span class="modulo-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2.5c3.2 4.2 6 7.9 6 11.3a6 6 0 0 1-12 0c0-3.4 2.8-7.1 6-11.3z"/><path d="M9.2 14.5a2.9 2.9 0 0 0 2.6 2.7"/></svg>
+          </span>
+          <span class="modulo-corpo">
+            <span class="modulo-tag">Leite</span>
+            <strong>Rebanho ideal</strong>
+            <span class="modulo-desc">Estrutura do rebanho a partir das vacas em lactação.</span>
+          </span>
+          <span class="modulo-seta" aria-hidden="true">&#8250;</span>
+        </a>
+        <a class="modulo leite" href="#/previsao-leite">
+          <span class="modulo-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><path d="M7.5 17l3-3 2 1.5 4-4"/></svg>
+          </span>
+          <span class="modulo-corpo">
+            <span class="modulo-tag">Leite</span>
+            <strong>Previsão de leite</strong>
+            <span class="modulo-desc">Vacas em lactação e produção nos próximos 12 meses.</span>
+          </span>
+          <span class="modulo-seta" aria-hidden="true">&#8250;</span>
+        </a>
+        <div class="modulo corte em-breve" aria-disabled="true">
+          <span class="modulo-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 7l3 2h10l3-2"/><path d="M7 9v5a5 5 0 0 0 10 0V9"/><path d="M10 16.5h4"/></svg>
+          </span>
+          <span class="modulo-corpo">
+            <span class="modulo-tag">Corte</span>
+            <strong>Rebanho de cria</strong>
+            <span class="modulo-desc">Estrutura do rebanho de cria.</span>
+          </span>
+          <span class="em-breve-selo">Em breve</span>
+        </div>
+        <div class="modulo economico em-breve" aria-disabled="true">
+          <span class="modulo-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6"/><path d="M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/></svg>
+          </span>
+          <span class="modulo-corpo">
+            <span class="modulo-tag">Econômico</span>
+            <strong>Custos COE, COT e CT</strong>
+            <span class="modulo-desc">Custo operacional e total por litro.</span>
+          </span>
+          <span class="em-breve-selo">Em breve</span>
+        </div>
+        <div class="modulo economico em-breve" aria-disabled="true">
+          <span class="modulo-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 20V4"/><path d="M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg>
+          </span>
+          <span class="modulo-corpo">
+            <span class="modulo-tag">Econômico</span>
+            <strong>DRE</strong>
+            <span class="modulo-desc">Demonstrativo de resultado da atividade.</span>
+          </span>
+          <span class="em-breve-selo">Em breve</span>
+        </div>
+      </nav>
+    </section>
+
+    <!-- Rebanho ideal — leite -->
+    <section id="tela-rebanho-leite" class="tela" hidden>
+      <form id="formRebanho" novalidate>
+        <div class="cartao">
+          <label class="campo">
+            <span>Propriedade</span>
+            <input name="fazenda" type="text" autocomplete="off" placeholder="Nome da fazenda">
+          </label>
+          <label class="campo">
+            <span>Vacas em lactação</span>
+            <input name="vacas" type="number" inputmode="numeric" min="1" step="1" required>
+          </label>
+        </div>
+
+        <fieldset class="segmentado">
+          <legend>Método de cálculo</legend>
+          <label><input type="radio" name="modo" value="padrao" checked><span>Padrão ATeG</span></label>
+          <label><input type="radio" name="modo" value="indices"><span>Índices da fazenda</span></label>
+        </fieldset>
+
+        <div id="blocoIndices" class="grade" hidden>
+          <label class="campo"><span>Intervalo entre partos (meses)</span>
+            <input name="iepMeses" type="number" inputmode="decimal" step="0.1"></label>
+          <label class="campo"><span>Período seco (dias)</span>
+            <input name="periodoSecoDias" type="number" inputmode="numeric" step="1"></label>
+          <label class="campo"><span>Idade ao 1º parto (meses)</span>
+            <input name="idadePrimeiroPartoMeses" type="number" inputmode="numeric" step="1"></label>
+          <label class="campo"><span>Descarte anual de vacas (%)</span>
+            <input name="descarteAnualPct" type="number" inputmode="decimal" step="0.1"></label>
+          <label class="campo"><span>Mortalidade bezerras 0–12 m (%/ano)</span>
+            <input name="mortBezerrasPct" type="number" inputmode="decimal" step="0.1"></label>
+          <label class="campo"><span>Mortalidade novilhas (%/ano)</span>
+            <input name="mortNovilhasPct" type="number" inputmode="decimal" step="0.1"></label>
+          <label class="campo"><span>Fêmeas nos nascimentos (%)</span>
+            <input name="femeasNascimentosPct" type="number" inputmode="decimal" step="1"></label>
+          <label class="campo"><span>Recria de fêmeas</span>
+            <select name="recria">
+              <option value="reposicao">Só a reposição necessária</option>
+              <option value="todas">Todas as fêmeas nascidas</option>
+            </select></label>
+        </div>
+
+        <details class="pesos">
+          <summary>Pesos médios para UA (450 kg = 1 UA)</summary>
+          <div class="grade">
+            <label class="campo"><span>Vaca adulta (kg)</span>
+              <input name="pesoVaca" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span>Bezerra 0–12 m (kg)</span>
+              <input name="pesoBezerra" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span>Novilha 12–24 m (kg)</span>
+              <input name="pesoNovilhaAte24" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span>Novilha &gt; 24 m (kg)</span>
+              <input name="pesoNovilhaAcima24" type="number" inputmode="numeric" step="1"></label>
+          </div>
+        </details>
+
+        <p id="erroRebanho" class="erro" role="alert" hidden></p>
+
+        <div class="acoes">
+          <button type="submit" class="primario">Calcular</button>
+          <button type="button" id="btnLimpar" class="secundario">Limpar</button>
+        </div>
+      </form>
+
+      <div id="resultadoRebanho" class="resultado" hidden></div>
+    </section>
+
+    <!-- Previsão de lactação e leite — 12 meses -->
+    <section id="tela-previsao-leite" class="tela" hidden>
+      <form id="formPrevisao" novalidate>
+        <input type="hidden" name="inicioPrevisao">
+        <div class="cartao">
+          <label class="campo">
+            <span>Propriedade</span>
+            <input name="fazenda" type="text" autocomplete="off" placeholder="Nome da fazenda">
+          </label>
+          <div class="grade">
+            <label class="campo"><span>Vacas em lactação hoje</span>
+              <input name="vacasLactacao" type="number" inputmode="numeric" min="0" step="1" required></label>
+            <label class="campo"><span>Vacas secas hoje</span>
+              <input name="vacasSecas" type="number" inputmode="numeric" min="0" step="1"></label>
+          </div>
+          <div class="grade">
+            <label class="campo"><span>Produção média (L/vaca em lactação/dia)</span>
+              <input name="producaoLitros" type="number" inputmode="decimal" min="0" step="0.1" required></label>
+            <label class="campo"><span>DEL médio hoje (dias) — opcional</span>
+              <input name="delMedio" type="number" inputmode="numeric" min="5" step="1" placeholder="Sem curva"></label>
+          </div>
+          <p class="nota">Com o DEL médio, a previsão usa a curva de lactação: vacas recém-paridas produzem mais
+            que as do fim da lactação.</p>
+        </div>
+
+        <div class="cartao">
+          <div class="cartao-titulo">
+            <strong>Partos previstos por mês</strong>
+            <span>Do controle reprodutivo (vacas e novilhas).</span>
+          </div>
+          <div id="gradePartos" class="grade-meses"></div>
+          <p id="dicaPartos" class="nota"></p>
+        </div>
+
+        <details class="pesos">
+          <summary>Índices usados na previsão</summary>
+          <div class="grade">
+            <label class="campo"><span>Período seco (dias)</span>
+              <input name="periodoSecoDias" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span>Descarte anual de vacas (%)</span>
+              <input name="descarteAnualPct" type="number" inputmode="decimal" step="0.1"></label>
+            <label class="campo"><span>Intervalo entre partos (meses)</span>
+              <input name="iepMeses" type="number" inputmode="decimal" step="0.1"></label>
+          </div>
+        </details>
+
+        <p id="erroPrevisao" class="erro" role="alert" hidden></p>
+
+        <div class="acoes">
+          <button type="submit" class="primario">Calcular previsão</button>
+          <button type="button" id="btnLimparPrevisao" class="secundario">Limpar</button>
+        </div>
+      </form>
+
+      <div id="resultadoPrevisao" class="resultado" hidden></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

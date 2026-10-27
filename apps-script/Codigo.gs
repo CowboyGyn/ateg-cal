@@ -7,7 +7,7 @@
  *
  * Colunas reconhecidas pelo cabeçalho (linha 1, qualquer ordem, maiúsculas ou não):
  *   Nome | Celular (ou Telefone, Número, WhatsApp) | Senha | Ativo ("não" bloqueia)
- *   Município | UF | E-mail | Função | Cadastro em
+ *   Município | UF (ou uma só "Município/UF") | E-mail | Função | Cadastro em
  * As colunas que faltarem são criadas no primeiro cadastro feito pelo app.
  *
  * Histórico de versões (aumente VERSAO a cada mudança e publique uma "Nova versão"):
@@ -136,8 +136,12 @@ function cadastrar(d) {
     linha[col.celular] = formatarCelular(chave, novo.celular);
     linha[col.senha] = novo.senha;
     linha[col.ativo] = "sim";
-    linha[col.municipio] = novo.municipio;
-    linha[col.uf] = novo.uf;
+    if (col.uf >= 0) {
+      linha[col.municipio] = novo.municipio;
+      linha[col.uf] = novo.uf;
+    } else {
+      linha[col.municipio] = novo.municipio + "/" + novo.uf;
+    }
     linha[col.email] = novo.email;
     linha[col.funcao] = novo.funcao;
     linha[col.cadastroEm] = Utilities.formatDate(new Date(), "America/Sao_Paulo", "dd/MM/yyyy HH:mm");
@@ -192,13 +196,16 @@ function localizarColunas(cabecalho) {
 }
 
 // Cria no fim da linha 1 as colunas que ainda não existem e devolve a posição de todas.
+// Se houver uma coluna única "Município/UF", a UF vai junto nela (col.uf fica -1).
 function garantirColunas(aba) {
   const largura = Math.max(aba.getLastColumn(), 1);
   const cabecalho = aba.getRange(1, 1, 1, largura).getDisplayValues()[0];
   const col = localizarColunas(cabecalho);
+  const municipioComUf = col.municipio >= 0 && /(^|[^a-z])uf([^a-z]|$)/.test(normalizar(cabecalho[col.municipio]));
   let proxima = cabecalho.every((c) => c === "") ? 0 : largura;
   for (const nome in COLUNAS) {
     if (col[nome] >= 0) continue;
+    if (nome === "uf" && municipioComUf) continue;
     aba.getRange(1, proxima + 1).setValue(COLUNAS[nome].titulo);
     col[nome] = proxima;
     proxima++;

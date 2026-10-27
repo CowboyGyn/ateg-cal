@@ -98,6 +98,40 @@ async function enviar(form, dados, textoCarregando, aoConfirmar) {
   }
 }
 
+// ---------- Municípios por UF (lista do IBGE guardada no app) ----------
+
+let municipiosPorUf = null;
+
+async function carregarMunicipios() {
+  if (!municipiosPorUf) {
+    const resp = await fetch("js/dados/municipios.json");
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    municipiosPorUf = await resp.json();
+  }
+  return municipiosPorUf;
+}
+
+async function preencherMunicipios() {
+  const campo = formCadastro.elements.municipio;
+  const uf = formCadastro.elements.uf.value;
+  campo.disabled = true;
+  try {
+    const nomes = (await carregarMunicipios())[uf] ?? [];
+    const opcao = (valor, texto = valor) => {
+      const o = document.createElement("option");
+      o.value = valor;
+      o.textContent = texto;
+      return o;
+    };
+    campo.replaceChildren(opcao("", "Selecione o município"), ...nomes.map((n) => opcao(n)));
+    // Estado com um só município (DF) já vem escolhido.
+    if (nomes.length === 1) campo.value = nomes[0];
+    campo.disabled = false;
+  } catch {
+    campo.replaceChildren(new Option("Não foi possível carregar a lista", ""));
+  }
+}
+
 function mostrarErro(erro, msg) {
   erro.textContent = msg;
   erro.hidden = false;
@@ -116,6 +150,8 @@ function limparFormularios() {
     for (const campo of form.querySelectorAll(".senha input")) campo.type = "password";
     for (const botao of form.querySelectorAll(".ver-senha")) botao.setAttribute("aria-pressed", "false");
   }
+  // O reset volta a UF para GO: a lista de municípios precisa acompanhar.
+  if (formCadastro.elements.municipio.options.length > 1) preencherMunicipios();
 }
 
 // aoEntrar(sessao) é chamado depois de um login ou cadastro bem-sucedido.
@@ -142,10 +178,12 @@ export function iniciarLogin(aoEntrar) {
   $("btnPrimeiroAcesso").addEventListener("click", () => {
     // Aproveita o celular já digitado no login.
     if (!formCadastro.elements.celular.value) formCadastro.elements.celular.value = formLogin.elements.celular.value;
+    if (formCadastro.elements.municipio.options.length <= 1) preencherMunicipios();
     mostrarBloco("cadastro");
     formCadastro.elements.nome.focus();
   });
   $("btnJaTenho").addEventListener("click", () => mostrarBloco("entrar"));
+  formCadastro.elements.uf.addEventListener("change", preencherMunicipios);
 
   $("btnEsqueci").addEventListener("click", () => {
     const celular = formLogin.elements.celular.value.trim();
@@ -180,7 +218,7 @@ export function iniciarLogin(aoEntrar) {
       nome: f.nome.value.trim(),
       celular: f.celular.value.trim(),
       email: f.email.value.trim(),
-      municipio: f.municipio.value.trim(),
+      municipio: f.municipio.value,
       uf: f.uf.value,
       funcao: f.funcao.value,
       senha: f.senha.value,
@@ -192,7 +230,7 @@ export function iniciarLogin(aoEntrar) {
     if (dados.nome.split(" ").filter(Boolean).length < 2) return falha("Informe o nome completo.", "nome");
     if (dados.celular.replace(/\D/g, "").length < 10) return falha("Informe o celular com DDD.", "celular");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dados.email)) return falha("Informe um e-mail válido.", "email");
-    if (!dados.municipio) return falha("Informe o município.", "municipio");
+    if (!dados.municipio) return falha("Selecione o município.", "municipio");
     if (!dados.funcao) return falha("Selecione a função.", "funcao");
     if (dados.senha.length < 4) return falha("A senha deve ter pelo menos 4 caracteres.", "senha");
     if (dados.senha !== f.confirmacao.value) return falha("As senhas não conferem.", "confirmacao");

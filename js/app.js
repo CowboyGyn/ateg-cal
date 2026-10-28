@@ -64,9 +64,25 @@ atualizarConexao();
 navegar();
 
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  // Quando uma versão nova do app assume, recarrega uma vez para mostrar as mudanças.
+  // Na primeira instalação não há controle anterior, então não recarrega.
+  if (navigator.serviceWorker.controller) {
+    let recarregando = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (recarregando) return;
+      recarregando = true;
+      location.reload();
+    });
+  }
   navigator.serviceWorker
     .register("sw.js")
-    .then(() => navigator.serviceWorker.ready)
+    .then((registro) => {
+      // App instalado costuma ficar aberto em segundo plano: procura atualização ao voltar para ele.
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && navigator.onLine) registro.update().catch(() => {});
+      });
+      return navigator.serviceWorker.ready;
+    })
     .then(() => {
       $("capaOffline").hidden = false;
     })

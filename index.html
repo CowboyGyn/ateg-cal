@@ -135,12 +135,118 @@
               </button>
             </span>
           </label>
+          <label class="check">
+            <input name="aceite" type="checkbox">
+            <span>Li e aceito os <a href="#/termos">Termos de uso e a Política de privacidade</a>.</span>
+          </label>
           <p id="erroCadastro" class="erro" role="alert" hidden></p>
           <button type="submit" class="primario">Cadastrar e entrar</button>
           </form>
           <button type="button" id="btnJaTenho" class="link">Já tenho cadastro — Entrar</button>
         </div>
+        <a class="link-termos" href="#/termos">Termos de uso e Privacidade</a>
       </div>
+    </section>
+
+    <!-- Termos de uso e Política de privacidade (leitura e aceite) -->
+    <section id="tela-termos" class="tela" hidden>
+      <div id="avisoAceite" class="aviso atencao" hidden>
+        Para continuar usando o ATeG Cal, leia e aceite os Termos de uso e a Política de privacidade.
+      </div>
+      <article class="cartao termos">
+        <h2>Termos de uso e Política de privacidade</h2>
+        <p class="sub">ATeG Cal · Versão <span id="versaoTermos"></span> · vigente desde 28/10/2026</p>
+
+        <h3>1. Quem é o responsável</h3>
+        <p>O ATeG Cal é desenvolvido e mantido por <b>Weder de Lima Vieira</b>, zootecnista, pessoa física,
+          com atuação em Goiânia/GO, que é o responsável (controlador) pelos dados pessoais tratados no app.
+          Contato: <a href="mailto:zootecnicaateg@gmail.com">zootecnicaateg@gmail.com</a> ou WhatsApp
+          <a href="https://wa.me/5562991176151">(62) 9 9117-6151</a>.</p>
+
+        <h3>2. O que é o app</h3>
+        <p>O ATeG Cal é uma calculadora de indicadores zootécnicos e econômicos para apoio a técnicos e produtores
+          rurais. No momento o uso é gratuito. Funcionalidades, condições de uso ou de acesso podem mudar no
+          futuro, com aviso prévio no próprio app.</p>
+
+        <h3>3. Uso e responsabilidade</h3>
+        <ul>
+          <li>Os resultados são <b>estimativas</b> calculadas a partir dos dados que você informa. Eles não substituem
+            o acompanhamento técnico da propriedade, e as decisões tomadas com base neles são de responsabilidade
+            de quem as toma.</li>
+          <li>Você é responsável pela veracidade dos dados que digita e pelos relatórios que compartilha.</li>
+          <li>O acesso é pessoal: não compartilhe sua senha. Use o app de forma lícita e sem tentar prejudicar seu
+            funcionamento.</li>
+          <li>O app é oferecido como está. Podem ocorrer erros ou interrupções, que serão corrigidos assim que
+            possível.</li>
+          <li>O acesso pode ser suspenso em caso de uso indevido destes termos.</li>
+        </ul>
+
+        <h3>4. Quais dados são coletados</h3>
+        <ul>
+          <li><b>Cadastro:</b> nome, celular, e-mail, município, UF, função e senha.</li>
+          <li><b>Uso do app:</b> data e hora em que o app e os módulos são abertos, quando um cálculo é feito, quando
+            um PDF é exportado e a versão do app.</li>
+          <li><b>Aceite destes termos:</b> data, hora e versão aceita.</li>
+        </ul>
+        <p>Os <b>dados das fazendas</b> digitados nos cálculos (rebanho, partos, produção etc.) <b>ficam somente no
+          seu aparelho</b> e não são enviados ao responsável.</p>
+
+        <h3>5. Para que os dados são usados</h3>
+        <ul>
+          <li>Liberar e controlar o acesso ao app.</li>
+          <li>Dar suporte e ajudar na recuperação de senha.</li>
+          <li>Entender quais módulos são mais usados, para melhorar o app e decidir as próximas funcionalidades.</li>
+          <li>Enviar comunicados sobre o app e conteúdos técnicos da Zootécnica ATeG. Você pode pedir para não
+            receber esses comunicados a qualquer momento.</li>
+        </ul>
+        <p>O tratamento se baseia no seu consentimento e na necessidade de prestar o serviço que você solicitou
+          (Lei 13.709/2018, LGPD, art. 7º, incisos I e V).</p>
+
+        <h3>6. Compartilhamento</h3>
+        <p>Os dados <b>não são vendidos nem compartilhados</b> com terceiros. Eles ficam guardados em uma planilha
+          do Google (Google Workspace), com acesso restrito ao responsável. O Google atua apenas como fornecedor de
+          armazenamento e pode guardar os dados em servidores fora do Brasil, seguindo suas próprias regras de
+          segurança.</p>
+
+        <h3>7. Por quanto tempo</h3>
+        <p>Os dados ficam guardados enquanto seu cadastro estiver ativo. Se você pedir a exclusão, os dados de
+          cadastro serão apagados em até 15 dias. Os registros de uso poderão ser mantidos apenas de forma anônima,
+          para estatística.</p>
+
+        <h3>8. Seus direitos</h3>
+        <p>Você pode, a qualquer momento, pedir para confirmar quais dados temos, ter acesso a eles, corrigi-los,
+          excluí-los ou revogar o seu consentimento (LGPD, art. 18), pelo e-mail ou WhatsApp do item 1. Sem o
+          consentimento não é possível continuar usando o app.</p>
+
+        <h3>9. Segurança</h3>
+        <p>São adotadas medidas razoáveis para proteger os dados, como acesso restrito à planilha e comunicação
+          criptografada (HTTPS). Nenhum sistema é totalmente seguro: use uma senha que você não usa em outros
+          serviços e avise o responsável se suspeitar de uso indevido do seu acesso.</p>
+
+        <h3>10. Dados guardados no aparelho</h3>
+        <p>Para funcionar sem internet, o app guarda no seu aparelho a sessão de acesso (por até 30 dias), os
+          últimos dados digitados em cada módulo e os registros de uso ainda não enviados. O botão “Sair” encerra
+          a sessão, e limpar os dados do navegador apaga essas informações.</p>
+
+        <h3>11. Mudanças nestes termos</h3>
+        <p>Estes termos podem ser atualizados. Quando isso acontecer, o app mostrará a nova versão e pedirá um
+          novo aceite.</p>
+
+        <h3>12. Lei e foro</h3>
+        <p>Estes termos seguem a lei brasileira. Fica eleito o foro da comarca de Goiânia/GO, ressalvado o direito
+          do consumidor de propor ação no foro do seu domicílio.</p>
+      </article>
+
+      <form id="formAceite" class="cartao" novalidate hidden>
+        <label class="check">
+          <input name="aceite" type="checkbox">
+          <span>Li e aceito os Termos de uso e a Política de privacidade.</span>
+        </label>
+        <p id="erroAceite" class="erro" role="alert" hidden></p>
+        <button type="submit" class="primario">Aceitar e continuar</button>
+        <button type="button" id="btnRecusar" class="link">Não aceito — sair</button>
+      </form>
+      <button type="button" id="btnFecharTermos" class="secundario fechar-termos">Voltar</button>
     </section>
 
     <!-- Tela inicial: módulos -->
@@ -215,6 +321,7 @@
           <span class="em-breve-selo">Em breve</span>
         </div>
       </nav>
+      <a class="link-termos" href="#/termos">Termos de uso e Privacidade</a>
     </section>
 
     <!-- Rebanho ideal — leite -->

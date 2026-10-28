@@ -1,7 +1,16 @@
 // Ponto de entrada: rotas por hash, indicador de conexão e service worker.
 // Cada módulo cuida do seu formulário e resultado.
 import { $ } from "./ui/comum.js";
-import { iniciarLogin, precisaLogin, sessaoAtual, sair } from "./ui/login.js";
+import { TERMOS_VERSAO } from "./config.js";
+import {
+  iniciarLogin,
+  precisaLogin,
+  precisaAceite,
+  aceitarTermos,
+  enviarAceitePendente,
+  sessaoAtual,
+  sair,
+} from "./ui/login.js";
 import { registrarUso, enviarUso } from "./uso.js";
 import "./ui/rebanho.js";
 import "./ui/previsao.js";
@@ -13,6 +22,7 @@ const ROTAS = {
   "rebanho-leite": { tela: "tela-rebanho-leite", titulo: "Rebanho ideal — leite" },
   "previsao-leite": { tela: "tela-previsao-leite", titulo: "Previsão de leite" },
   "rebanho-corte": { tela: "tela-rebanho-corte", titulo: "Rebanho ideal — corte" },
+  termos: { tela: "tela-termos", titulo: "Termos e privacidade" },
 };
 
 // ---------- Rotas ----------
@@ -29,15 +39,24 @@ function contarAbertura(rota) {
 
 function navegar() {
   const rota = location.hash.replace(/^#\/?/, "");
-  // Sem sessão, qualquer rota mostra o login; depois de entrar, volta para a rota pedida.
-  const destino = precisaLogin() ? ROTAS.login : ((rota !== "login" && ROTAS[rota]) || ROTAS[""]);
-  if (destino !== ROTAS.login) contarAbertura(rota);
+  // Os termos abrem sempre (inclusive antes do login). Sem sessão, as outras rotas mostram o login;
+  // com sessão sem aceite, mostram os termos para aceitar. Depois disso, volta para a rota pedida.
+  const aceite = !precisaLogin() && precisaAceite();
+  let destino;
+  if (rota === "termos" || aceite) destino = ROTAS.termos;
+  else if (precisaLogin()) destino = ROTAS.login;
+  else destino = (rota !== "login" && ROTAS[rota]) || ROTAS[""];
+  if (destino !== ROTAS.login && destino !== ROTAS.termos) contarAbertura(rota);
+
+  $("avisoAceite").hidden = !aceite;
+  $("formAceite").hidden = !aceite;
+  $("btnFecharTermos").hidden = aceite;
   for (const tela of document.querySelectorAll(".tela")) {
     tela.hidden = tela.id !== destino.tela;
   }
   $("tituloTela").textContent = destino.titulo;
   document.title = destino.titulo === "ATeG Cal" ? "ATeG Cal" : `${destino.titulo} · ATeG Cal`;
-  $("btnVoltar").hidden = destino.tela === "tela-inicio" || destino.tela === "tela-login";
+  $("btnVoltar").hidden = ["tela-inicio", "tela-login", "tela-termos"].includes(destino.tela);
   mostrarUsuario();
   window.scrollTo(0, 0);
 }
@@ -46,6 +65,37 @@ $("btnVoltar").addEventListener("click", () => {
   location.hash = "#/";
 });
 window.addEventListener("hashchange", navegar);
+
+// ---------- Termos de uso ----------
+
+$("versaoTermos").textContent = TERMOS_VERSAO;
+
+// Leitura: volta para a tela de onde veio (login, cadastro ou início).
+$("btnFecharTermos").addEventListener("click", () => {
+  if (history.length > 1) history.back();
+  else location.hash = "#/";
+});
+
+$("formAceite").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const form = e.target;
+  if (!form.elements.aceite.checked) {
+    $("erroAceite").textContent = "Marque a caixa para aceitar e continuar.";
+    $("erroAceite").hidden = false;
+    return;
+  }
+  $("erroAceite").hidden = true;
+  form.reset();
+  aceitarTermos();
+  if (location.hash.replace(/^#\/?/, "") === "termos") location.hash = "#/";
+  else navegar();
+});
+
+$("btnRecusar").addEventListener("click", () => {
+  sair();
+  location.hash = "#/";
+  navegar();
+});
 
 // ---------- Usuário ----------
 
@@ -66,7 +116,10 @@ $("btnSair").addEventListener("click", () => {
 
 function atualizarConexao() {
   $("seloOffline").hidden = navigator.onLine;
-  if (navigator.onLine) enviarUso();
+  if (navigator.onLine) {
+    enviarAceitePendente();
+    enviarUso();
+  }
 }
 window.addEventListener("online", atualizarConexao);
 window.addEventListener("offline", atualizarConexao);

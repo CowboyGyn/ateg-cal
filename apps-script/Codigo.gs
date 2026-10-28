@@ -15,9 +15,11 @@
  *   1.1.0 — 27/10/2026 — "Primeiro acesso": cadastro pelo app, liberado na hora,
  *                        com aviso por e-mail ao dono da planilha.
  *   1.2.0 — 28/10/2026 — contagem de uso dos módulos nas abas "Uso" e "Resumo de uso".
+ *   1.3.0 — 28/10/2026 — aceite dos Termos de uso: colunas "Termos aceitos em" e
+ *                        "Versão dos termos", gravadas no cadastro e pela ação "aceite".
  */
 
-const VERSAO = "1.2.0";
+const VERSAO = "1.3.0";
 const PLANILHA_ID = "1SFTDBS8Jiz3yPBbbdkgb8MkWZCbKU9Ed8wjDxNR7pAA";
 const ABA = ""; // vazio = primeira aba
 const MAX_TENTATIVAS = 5;
@@ -36,7 +38,10 @@ const COLUNAS = {
   email: { titulo: "E-mail", re: /^e-?mail/ },
   funcao: { titulo: "Função", re: /^funcao|^cargo/ },
   cadastroEm: { titulo: "Cadastro em", re: /^cadastr|^data/ },
+  termosEm: { titulo: "Termos aceitos em", re: /^termos/ },
+  termosVersao: { titulo: "Versão dos termos", re: /^versao.*termos/ },
 };
+const MAX_ACEITES_HORA = 10; // por celular
 
 // Contagem de uso: só aceita módulos e ações conhecidos, gravados com nome legível.
 const ABA_USO = "Uso";
@@ -65,6 +70,7 @@ function doPost(e) {
   if (dados.acao === "login") return responder(login(String(dados.celular || ""), String(dados.senha || "")));
   if (dados.acao === "cadastro") return responder(cadastrar(dados));
   if (dados.acao === "uso") return responder(registrarUso(dados));
+  if (dados.acao === "aceite") return responder(registrarAceite(dados));
   return responder({ ok: false, erro: "Ação desconhecida." });
 }
 
@@ -90,7 +96,8 @@ function login(celular, senha) {
     return { ok: false, erro: "Acesso desativado. Fale com a Zootécnica ATeG." };
   }
   cache.remove(chaveCache);
-  return { ok: true, nome: String(usuario.nome || "").trim() };
+  // termos: versão já aceita (vazio = o app pede o aceite).
+  return { ok: true, nome: String(usuario.nome || "").trim(), termos: String(usuario.termos || "").trim() };
 }
 
 function buscarUsuario(chave) {
@@ -105,7 +112,13 @@ function buscarUsuario(chave) {
     const linha = valores[i];
     if (chaveCelular(linha[col.celular]) !== chave) continue;
     const ativo = col.ativo < 0 ? true : !/^(nao|n|inativo|bloqueado|false|0)$/.test(normalizar(linha[col.ativo]));
-    return { nome: col.nome < 0 ? "" : linha[col.nome], senha: linha[col.senha], ativo: ativo };
+    return {
+      nome: col.nome < 0 ? "" : linha[col.nome],
+      senha: linha[col.senha],
+      ativo: ativo,
+      termos: col.termosVersao < 0 ? "" : linha[col.termosVersao],
+      linha: i + 1,
+    };
   }
   return null;
 }
@@ -160,6 +173,11 @@ function cadastrar(d) {
     linha[col.email] = novo.email;
     linha[col.funcao] = novo.funcao;
     linha[col.cadastroEm] = Utilities.formatDate(new Date(), "America/Sao_Paulo", "dd/MM/yyyy HH:mm");
+    const termos = limpar(d.termos, 10);
+    if (termos) {
+      linha[col.termosEm] = linha[col.cadastroEm];
+      linha[col.termosVersao] = termos;
+    }
 
     const numLinha = aba.getLastRow() + 1;
     const intervalo = aba.getRange(numLinha, 1, 1, largura);
@@ -194,6 +212,44 @@ function avisarCadastro(novo) {
     // O cadastro vale mesmo se o e-mail falhar (ex.: cota diária do Gmail).
     console.warn("Falha ao enviar aviso de cadastro: " + err);
   }
+}
+
+// ---------- Aceite dos Termos de uso ----------
+
+// O app aceita na hora (mesmo offline) e envia depois: grava a data do aceite no aparelho.
+function registrarAceite(d) {
+  const chave = chaveCelular(d.celular);
+  const versao = limpar(d.versao, 10);
+  if (!chave || !versao) return { ok: false, erro: "Dados do aceite inválidos." };
+
+  const cache = CacheService.getScriptCache();
+  const chaveCache = "aceite_" + chave;
+  const envios = Number(cache.get(chaveCache) || 0);
+  if (envios >= MAX_ACEITES_HORA) return { ok: false, erro: "Muitos envios. Tente mais tarde." };
+  cache.put(chaveCache, String(envios + 1), 3600);
+
+  const agora = Date.now();
+  let quando = new Date(d.quando);
+  if (isNaN(quando) || quando.getTime() > agora + 3600000 || quando.getTime() < agora - 90 * 86400000) {
+    quando = new Date(agora);
+  }
+
+  const trava = LockService.getScriptLock();
+  if (!trava.tryLock(20000)) return { ok: false, erro: "Servidor ocupado." };
+  try {
+    const usuario = buscarUsuario(chave);
+    // Celular fora da planilha: descarta sem erro, para o app não reenviar para sempre.
+    if (!usuario) return { ok: true };
+    const aba = abrirAba();
+    const col = garantirColunas(aba);
+    aba.getRange(usuario.linha, col.termosEm + 1).setNumberFormat("@")
+      .setValue(Utilities.formatDate(quando, "America/Sao_Paulo", "dd/MM/yyyy HH:mm"));
+    aba.getRange(usuario.linha, col.termosVersao + 1).setNumberFormat("@").setValue(versao);
+    SpreadsheetApp.flush();
+  } finally {
+    trava.releaseLock();
+  }
+  return { ok: true };
 }
 
 // ---------- Contagem de uso ----------

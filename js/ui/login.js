@@ -1,6 +1,6 @@
 // Login e cadastro (primeiro acesso) pelo celular: conversa com o Apps Script ligado à
 // planilha de usuários e guarda a sessão no aparelho, para o app seguir funcionando offline.
-import { LOGIN_URL, DIAS_SESSAO, WHATSAPP_SUPORTE } from "../config.js";
+import { LOGIN_URL, DIAS_SESSAO, WHATSAPP_SUPORTE, TERMOS_VERSAO } from "../config.js";
 import { $ } from "./comum.js";
 
 const CHAVE_SESSAO = "ateg-cal:sessao";
@@ -23,14 +23,46 @@ export function sessaoAtual() {
 
 export const precisaLogin = () => loginAtivo() && !sessaoAtual();
 
-function salvarSessao(nome, celular) {
-  const sessao = { nome, celular, validoAte: Date.now() + DIAS_SESSAO * 86400000 };
+// Sessão sem o aceite da versão atual dos termos (inclui sessões antigas, sem o campo).
+export function precisaAceite() {
+  const s = sessaoAtual();
+  return !!s && s.termos !== TERMOS_VERSAO;
+}
+
+function gravarSessao(sessao) {
   try {
     localStorage.setItem(CHAVE_SESSAO, JSON.stringify(sessao));
   } catch {
     // Sem armazenamento a sessão vale só enquanto a página estiver aberta.
   }
   return sessao;
+}
+
+function salvarSessao(nome, celular, termos) {
+  return gravarSessao({ nome, celular, termos, validoAte: Date.now() + DIAS_SESSAO * 86400000 });
+}
+
+// O aceite vale na hora, mesmo offline; o registro na planilha é enviado quando houver internet.
+export function aceitarTermos() {
+  const s = sessaoAtual();
+  if (!s) return;
+  gravarSessao({ ...s, termos: TERMOS_VERSAO, termosEm: new Date().toISOString(), termosPendente: true });
+  enviarAceitePendente();
+}
+
+export async function enviarAceitePendente() {
+  const s = sessaoAtual();
+  if (!s || !s.termosPendente || !navigator.onLine) return;
+  try {
+    const r = await chamarScript({ acao: "aceite", celular: s.celular, versao: s.termos, quando: s.termosEm });
+    const atual = sessaoAtual();
+    if (r.ok && atual && atual.celular === s.celular) {
+      delete atual.termosPendente;
+      gravarSessao(atual);
+    }
+  } catch {
+    // Sem conexão com o script: tenta de novo na próxima abertura.
+  }
 }
 
 export function sair() {
@@ -191,10 +223,10 @@ export function iniciarLogin(aoEntrar) {
     window.open(`https://wa.me/${WHATSAPP_SUPORTE}?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
   });
 
-  const concluir = (nome, celular) => {
+  const concluir = (nome, celular, termos) => {
     limparFormularios();
     mostrarBloco("entrar");
-    aoEntrar(salvarSessao(nome, celular));
+    aoEntrar(salvarSessao(nome, celular, termos));
   };
 
   formLogin.addEventListener("submit", (e) => {
@@ -205,7 +237,7 @@ export function iniciarLogin(aoEntrar) {
     const senha = formLogin.elements.senha.value;
     if (celular.replace(/\D/g, "").length < 10) return mostrarErro(erro, "Informe o celular com DDD.");
     if (!senha) return mostrarErro(erro, "Informe a senha.");
-    enviar(formLogin, { acao: "login", celular, senha }, "Entrando…", (r) => concluir(r.nome || "", celular));
+    enviar(formLogin, { acao: "login", celular, senha }, "Entrando…", (r) => concluir(r.nome || "", celular, r.termos || ""));
   });
 
   formCadastro.addEventListener("submit", (e) => {
@@ -222,6 +254,7 @@ export function iniciarLogin(aoEntrar) {
       uf: f.uf.value,
       funcao: f.funcao.value,
       senha: f.senha.value,
+      termos: TERMOS_VERSAO,
     };
     const falha = (msg, campo) => {
       mostrarErro(erro, msg);
@@ -234,6 +267,7 @@ export function iniciarLogin(aoEntrar) {
     if (!dados.funcao) return falha("Selecione a função.", "funcao");
     if (dados.senha.length < 4) return falha("A senha deve ter pelo menos 4 caracteres.", "senha");
     if (dados.senha !== f.confirmacao.value) return falha("As senhas não conferem.", "confirmacao");
-    enviar(formCadastro, dados, "Cadastrando…", (r) => concluir(r.nome || dados.nome, dados.celular));
+    if (!f.aceite.checked) return falha("Para se cadastrar, aceite os Termos de uso e a Política de privacidade.", "aceite");
+    enviar(formCadastro, dados, "Cadastrando…", (r) => concluir(r.nome || dados.nome, dados.celular, TERMOS_VERSAO));
   });
 }

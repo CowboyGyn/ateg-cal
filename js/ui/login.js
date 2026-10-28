@@ -268,6 +268,10 @@ export function iniciarLogin(aoEntrar) {
     if (dados.senha.length < 4) return falha("A senha deve ter pelo menos 4 caracteres.", "senha");
     if (dados.senha !== f.confirmacao.value) return falha("As senhas não conferem.", "confirmacao");
     if (!f.aceite.checked) return falha("Para se cadastrar, aceite os Termos de uso e a Política de privacidade.", "aceite");
-    enviar(formCadastro, dados, "Cadastrando…", (r) => concluir(r.nome || dados.nome, dados.celular, TERMOS_VERSAO));
+    enviar(formCadastro, dados, "Cadastrando…", (r) => {
+      concluir(r.nome || dados.nome, dados.celular, TERMOS_VERSAO);
+      // Confirma o aceite também pela ação própria: garante o registro mesmo com script antigo.
+      aceitarTermos();
+    });
   });
 }

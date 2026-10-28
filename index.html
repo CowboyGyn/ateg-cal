@@ -181,17 +181,17 @@
           </span>
           <span class="modulo-seta" aria-hidden="true">&#8250;</span>
         </a>
-        <div class="modulo corte em-breve" aria-disabled="true">
+        <a class="modulo corte" href="#/rebanho-corte">
           <span class="modulo-icone" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M4 7l3 2h10l3-2"/><path d="M7 9v5a5 5 0 0 0 10 0V9"/><path d="M10 16.5h4"/></svg>
           </span>
           <span class="modulo-corpo">
             <span class="modulo-tag">Corte</span>
-            <strong>Rebanho de cria</strong>
-            <span class="modulo-desc">Estrutura do rebanho de cria.</span>
+            <strong>Rebanho de corte</strong>
+            <span class="modulo-desc">Cria, recria ou ciclo completo a partir das matrizes.</span>
           </span>
-          <span class="em-breve-selo">Em breve</span>
-        </div>
+          <span class="modulo-seta" aria-hidden="true">&#8250;</span>
+        </a>
         <div class="modulo economico em-breve" aria-disabled="true">
           <span class="modulo-icone" aria-hidden="true">
             <svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6"/><path d="M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/></svg>
@@ -339,6 +339,84 @@
       </form>
 
       <div id="resultadoPrevisao" class="resultado" hidden></div>
+    </section>
+
+    <!-- Rebanho ideal — corte -->
+    <section id="tela-rebanho-corte" class="tela" hidden>
+      <form id="formCorte" novalidate>
+        <div class="cartao">
+          <label class="campo">
+            <span>Propriedade</span>
+            <input name="fazenda" type="text" autocomplete="off" placeholder="Nome da fazenda">
+          </label>
+          <label class="campo">
+            <span>Matrizes (vacas de cria)</span>
+            <input name="matrizes" type="number" inputmode="numeric" min="1" step="1" required>
+          </label>
+        </div>
+
+        <fieldset class="segmentado tres">
+          <legend>Sistema de produção</legend>
+          <label><input type="radio" name="fase" value="cria" checked><span>Só cria</span></label>
+          <label><input type="radio" name="fase" value="recria"><span>Cria + recria</span></label>
+          <label><input type="radio" name="fase" value="completo"><span>Ciclo completo</span></label>
+        </fieldset>
+        <p id="descFase" class="nota"></p>
+
+        <div class="cartao">
+          <div class="cartao-titulo">
+            <strong>Índices da fazenda</strong>
+            <span>Campo vazio usa o valor de referência mostrado.</span>
+          </div>
+          <div class="grade">
+            <label class="campo"><span>Taxa de natalidade (%)</span>
+              <input name="natalidadePct" type="number" inputmode="decimal" step="0.1"></label>
+            <label class="campo"><span>Mortalidade até a desmama (%)</span>
+              <input name="mortDesmamaPct" type="number" inputmode="decimal" step="0.1"></label>
+            <label class="campo"><span>Idade à desmama (meses)</span>
+              <input name="idadeDesmamaMeses" type="number" inputmode="decimal" step="0.5"></label>
+            <label class="campo"><span>Peso à desmama (kg)</span>
+              <input name="pesoDesmama" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span>Mortalidade pós-desmama (%/ano)</span>
+              <input name="mortPosDesmamaPct" type="number" inputmode="decimal" step="0.1"></label>
+            <label class="campo"><span>Idade ao 1º parto (meses)</span>
+              <input name="idadePrimeiroPartoMeses" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span>Descarte anual de matrizes (%)</span>
+              <input name="descarteMatrizesPct" type="number" inputmode="decimal" step="0.1"></label>
+            <label class="campo"><span>Vacas por touro</span>
+              <input name="vacasPorTouro" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span>Fêmeas nos nascimentos (%)</span>
+              <input name="femeasNascimentosPct" type="number" inputmode="decimal" step="1"></label>
+          </div>
+          <div id="blocoSaida" class="grade" hidden>
+            <label class="campo"><span id="rotuloIdadeSaida">Idade de venda dos machos (meses)</span>
+              <input name="idadeSaidaMeses" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span id="rotuloPesoSaida">Peso de venda dos machos (kg)</span>
+              <input name="pesoSaidaKg" type="number" inputmode="numeric" step="1"></label>
+          </div>
+        </div>
+
+        <details class="pesos">
+          <summary>Pesos médios para UA (450 kg = 1 UA)</summary>
+          <div class="grade">
+            <label class="campo"><span>Matriz (kg)</span>
+              <input name="pesoMatriz" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span>Touro (kg)</span>
+              <input name="pesoTouro" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span>Novilha ao 1º parto (kg)</span>
+              <input name="pesoNovilhaPrimeiroParto" type="number" inputmode="numeric" step="1"></label>
+          </div>
+        </details>
+
+        <p id="erroCorte" class="erro" role="alert" hidden></p>
+
+        <div class="acoes">
+          <button type="submit" class="primario">Calcular</button>
+          <button type="button" id="btnLimparCorte" class="secundario">Limpar</button>
+        </div>
+      </form>
+
+      <div id="resultadoCorte" class="resultado" hidden></div>
     </section>
   </main>
 

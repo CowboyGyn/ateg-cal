@@ -4,12 +4,14 @@ import { $ } from "./ui/comum.js";
 import { iniciarLogin, precisaLogin, sessaoAtual, sair } from "./ui/login.js";
 import "./ui/rebanho.js";
 import "./ui/previsao.js";
+import "./ui/corte.js";
 
 const ROTAS = {
   "": { tela: "tela-inicio", titulo: "ATeG Cal" },
   login: { tela: "tela-login", titulo: "ATeG Cal" },
   "rebanho-leite": { tela: "tela-rebanho-leite", titulo: "Rebanho ideal — leite" },
   "previsao-leite": { tela: "tela-previsao-leite", titulo: "Previsão de leite" },
+  "rebanho-corte": { tela: "tela-rebanho-corte", titulo: "Rebanho ideal — corte" },
 };
 
 // ---------- Rotas ----------

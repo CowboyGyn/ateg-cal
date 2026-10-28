@@ -70,6 +70,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -317,6 +318,9 @@ input[name="vacas"] { font-size: 1.25rem; font-weight: 600; }
   border-radius: var(--raio);
   background: var(--superficie);
 }
+.segmentado.tres { grid-template-columns: repeat(3, 1fr); }
+.segmentado.tres span { font-size: 0.9rem; padding: 10px 4px; }
+#blocoSaida { margin-top: 12px; }
 .segmentado legend { padding: 0 4px; font-size: 0.85rem; color: var(--texto-suave); }
 .segmentado label { position: relative; }
 .segmentado input { position: absolute; opacity: 0; min-height: 0; }

@@ -11,6 +11,10 @@ export const escapar = (s) =>
 
 export const dataHoje = () => new Date().toLocaleDateString("pt-BR");
 
+// Avisa o app que um módulo foi usado (a contagem de uso fica em js/uso.js).
+export const avisarUso = (modulo, acao) =>
+  document.dispatchEvent(new CustomEvent("ateg-cal:uso", { detail: { modulo, acao } }));
+
 // ---------- Formulários ----------
 
 // Campo vazio → valor padrão. Aceita vírgula decimal mesmo em navegadores que a repassam.
@@ -116,9 +120,10 @@ export function rodapeRelatorio() {
 export const botaoPdf = () => `<button type="button" class="primario btn-pdf">Exportar PDF</button>`;
 
 // Liga o botão "Exportar PDF" de um resultado; nomeArquivo() devolve as partes do nome.
-export function ativarPdf(container, nomeArquivo) {
+export function ativarPdf(container, nomeArquivo, modulo) {
   container.addEventListener("click", (e) => {
     if (!e.target.closest(".btn-pdf")) return;
+    avisarUso(modulo, "pdf");
     const tituloOriginal = document.title;
     // O título vira o nome sugerido do arquivo PDF.
     document.title = [...nomeArquivo(), dataHoje().replaceAll("/", "-")].filter(Boolean).join(" - ");

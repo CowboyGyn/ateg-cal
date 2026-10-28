@@ -19,6 +19,7 @@ import {
   botaoPdf,
   ativarPdf,
   ativarDicas,
+  avisarUso,
 } from "./comum.js";
 
 const CHAVE_STORAGE = "ateg-cal:rebanho-leite";
@@ -104,6 +105,7 @@ form.addEventListener("submit", (e) => {
     return;
   }
   salvarFormulario(form, CHAVE_STORAGE);
+  avisarUso("rebanho-leite", "calcular");
   resultado.innerHTML =
     cabecalhoRelatorio("Rebanho ideal (leite)", entrada.fazenda) +
     renderizarResultado(r, entrada.fazenda) +
@@ -247,7 +249,7 @@ function renderizarReposicao(r) {
 }
 
 ativarDicas(resultado);
-ativarPdf(resultado, () => ["Rebanho ideal", form.elements.fazenda.value.trim()]);
+ativarPdf(resultado, () => ["Rebanho ideal", form.elements.fazenda.value.trim()], "rebanho-leite");
 
 preencherPlaceholders();
 restaurarFormulario(form, CHAVE_STORAGE);

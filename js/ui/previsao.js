@@ -15,6 +15,7 @@ import {
   ativarPdf,
   ativarDicas,
   graficoBarras,
+  avisarUso,
 } from "./comum.js";
 
 const CHAVE_STORAGE = "ateg-cal:previsao-leite";
@@ -99,6 +100,7 @@ form.addEventListener("submit", (e) => {
     return mostrarErro(err.message);
   }
   salvarFormulario(form, CHAVE_STORAGE);
+  avisarUso("previsao-leite", "calcular");
   resultado.innerHTML =
     cabecalhoRelatorio("Previsão de lactação e leite — 12 meses", entrada.fazenda) +
     renderizarResultado(r, entrada) +
@@ -246,7 +248,7 @@ function renderizarPremissas(r, entrada) {
 }
 
 ativarDicas(resultado);
-ativarPdf(resultado, () => ["Previsão de leite", form.elements.fazenda.value.trim()]);
+ativarPdf(resultado, () => ["Previsão de leite", form.elements.fazenda.value.trim()], "previsao-leite");
 
 // Os partos são salvos por posição (mês 1 a 12). Se o mês virou desde o último uso,
 // desloca os valores para cada parto continuar no seu mês do calendário.

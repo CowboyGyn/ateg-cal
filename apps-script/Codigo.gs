@@ -14,9 +14,10 @@
  *   1.0.0 — 27/10/2026 — login por celular e senha, bloqueio após 5 tentativas.
  *   1.1.0 — 27/10/2026 — "Primeiro acesso": cadastro pelo app, liberado na hora,
  *                        com aviso por e-mail ao dono da planilha.
+ *   1.2.0 — 28/10/2026 — contagem de uso dos módulos nas abas "Uso" e "Resumo de uso".
  */
 
-const VERSAO = "1.1.0";
+const VERSAO = "1.2.0";
 const PLANILHA_ID = "1SFTDBS8Jiz3yPBbbdkgb8MkWZCbKU9Ed8wjDxNR7pAA";
 const ABA = ""; // vazio = primeira aba
 const MAX_TENTATIVAS = 5;
@@ -37,6 +38,19 @@ const COLUNAS = {
   cadastroEm: { titulo: "Cadastro em", re: /^cadastr|^data/ },
 };
 
+// Contagem de uso: só aceita módulos e ações conhecidos, gravados com nome legível.
+const ABA_USO = "Uso";
+const ABA_RESUMO = "Resumo de uso";
+const MODULOS_USO = {
+  app: "App",
+  "rebanho-leite": "Rebanho ideal — leite",
+  "previsao-leite": "Previsão de leite",
+  "rebanho-corte": "Rebanho ideal — corte",
+};
+const ACOES_USO = { abrir: "Abriu", calcular: "Calculou", pdf: "Exportou PDF" };
+const MAX_EVENTOS_ENVIO = 100;
+const MAX_ENVIOS_HORA = 60; // por celular
+
 function doGet() {
   return responder({ ok: true, servico: "ATeG Cal login" });
 }
@@ -50,6 +64,7 @@ function doPost(e) {
   }
   if (dados.acao === "login") return responder(login(String(dados.celular || ""), String(dados.senha || "")));
   if (dados.acao === "cadastro") return responder(cadastrar(dados));
+  if (dados.acao === "uso") return responder(registrarUso(dados));
   return responder({ ok: false, erro: "Ação desconhecida." });
 }
 
@@ -181,6 +196,106 @@ function avisarCadastro(novo) {
   }
 }
 
+// ---------- Contagem de uso ----------
+
+function registrarUso(d) {
+  const chave = chaveCelular(d.celular);
+  if (!chave) return { ok: false, erro: "Celular inválido." };
+
+  const cache = CacheService.getScriptCache();
+  const chaveCache = "uso_" + chave;
+  const envios = Number(cache.get(chaveCache) || 0);
+  if (envios >= MAX_ENVIOS_HORA) return { ok: false, erro: "Muitos envios. Tente mais tarde." };
+  cache.put(chaveCache, String(envios + 1), 3600);
+
+  // Celular fora da planilha: descarta sem erro, para o app não reenviar para sempre.
+  const usuario = buscarUsuario(chave);
+  if (!usuario) return { ok: true, gravados: 0 };
+
+  const agora = Date.now();
+  const versaoApp = limpar(d.versaoApp, 20);
+  const eventos = Array.isArray(d.eventos) ? d.eventos.slice(0, MAX_EVENTOS_ENVIO) : [];
+  const linhas = [];
+  for (const ev of eventos) {
+    if (!ev || !MODULOS_USO.hasOwnProperty(ev.modulo) || !ACOES_USO.hasOwnProperty(ev.acao)) continue;
+    const quando = new Date(ev.quando);
+    // Aceita até 90 dias atrás (uso offline) e descarta datas no futuro.
+    if (isNaN(quando) || quando.getTime() > agora + 3600000 || quando.getTime() < agora - 90 * 86400000) continue;
+    linhas.push([
+      quando,
+      String(usuario.nome || "").trim(),
+      formatarCelular(chave, d.celular),
+      MODULOS_USO[ev.modulo],
+      ACOES_USO[ev.acao],
+      versaoApp,
+    ]);
+  }
+  if (!linhas.length) return { ok: true, gravados: 0 };
+
+  const trava = LockService.getScriptLock();
+  if (!trava.tryLock(20000)) return { ok: false, erro: "Servidor ocupado." };
+  try {
+    const aba = abaUso();
+    aba.getRange(aba.getLastRow() + 1, 1, linhas.length, linhas[0].length).setValues(linhas);
+  } finally {
+    trava.releaseLock();
+  }
+  return { ok: true, gravados: linhas.length };
+}
+
+// Abas de uso ficam no fim da planilha: a primeira aba continua sendo a de usuários.
+function abaUso() {
+  const planilha = SpreadsheetApp.openById(PLANILHA_ID);
+  let aba = planilha.getSheetByName(ABA_USO);
+  if (aba) return aba;
+
+  aba = planilha.insertSheet(ABA_USO, planilha.getNumSheets());
+  aba.getRange(1, 1, 1, 6).setValues([["Data/hora", "Nome", "Celular", "Módulo", "Ação", "Versão do app"]])
+    .setFontWeight("bold");
+  aba.getRange("A2:A").setNumberFormat("dd/MM/yyyy HH:mm");
+  aba.getRange("C2:C").setNumberFormat("@");
+  aba.setFrozenRows(1);
+
+  criarResumo(planilha);
+  return aba;
+}
+
+// Aba de resumo com fórmulas: atualiza sozinha a cada novo registro.
+function criarResumo(planilha) {
+  if (planilha.getSheetByName(ABA_RESUMO)) return;
+  const r = planilha.insertSheet(ABA_RESUMO, planilha.getNumSheets());
+  r.getRange("A1").setValue("Resumo de uso do ATeG Cal").setFontWeight("bold").setFontSize(14);
+
+  r.getRange("A3:A5").setValues([
+    ["Usuários diferentes nos últimos 7 dias"],
+    ["Usuários diferentes nos últimos 30 dias"],
+    ["Usuários diferentes desde o início"],
+  ]);
+  r.getRange("B3").setFormula("=IFERROR(COUNTUNIQUE(FILTER(Uso!C2:C, Uso!A2:A >= TODAY() - 7)), 0)");
+  r.getRange("B4").setFormula("=IFERROR(COUNTUNIQUE(FILTER(Uso!C2:C, Uso!A2:A >= TODAY() - 30)), 0)");
+  r.getRange("B5").setFormula("=COUNTUNIQUE(Uso!C2:C)");
+
+  r.getRange("A7").setValue("Por módulo (quantas vezes)").setFontWeight("bold");
+  r.getRange("A8").setFormula(
+    "=IFERROR(QUERY(Uso!A:F, \"select D, count(A) where D is not null group by D pivot E label D 'Módulo'\", 1), \"Sem dados ainda\")",
+  );
+
+  r.getRange("G7").setValue("Por mês").setFontWeight("bold");
+  r.getRange("G8").setFormula(
+    "=IFERROR(QUERY(Uso!A:F, \"select year(A), month(A) + 1, count(A) where A is not null " +
+      "group by year(A), month(A) + 1 order by year(A), month(A) + 1 " +
+      "label year(A) 'Ano', month(A) + 1 'Mês', count(A) 'Ações'\", 1), \"Sem dados ainda\")",
+  );
+
+  r.getRange("K7").setValue("Por usuário (mais ativos primeiro)").setFontWeight("bold");
+  r.getRange("K8").setFormula(
+    "=IFERROR(QUERY(Uso!A:F, \"select B, C, count(A), max(A) where C is not null group by B, C " +
+      "order by count(A) desc label B 'Nome', C 'Celular', count(A) 'Ações', max(A) 'Último uso' " +
+      "format max(A) 'dd/mm/yyyy'\", 1), \"Sem dados ainda\")",
+  );
+  r.setColumnWidth(1, 280);
+}
+
 // ---------- Planilha ----------
 
 function abrirAba() {
@@ -253,4 +368,5 @@ function testarLeitura() {
   const aba = abrirAba();
   Logger.log("ATeG Cal login v" + VERSAO + " — planilha: " + aba.getParent().getName() + " — linhas: " + aba.getLastRow());
   Logger.log("Cota de e-mails restante hoje: " + MailApp.getRemainingDailyQuota());
+  Logger.log("Aba de uso pronta: " + abaUso().getName());
 }

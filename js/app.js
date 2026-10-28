@@ -2,6 +2,7 @@
 // Cada módulo cuida do seu formulário e resultado.
 import { $ } from "./ui/comum.js";
 import { iniciarLogin, precisaLogin, sessaoAtual, sair } from "./ui/login.js";
+import { registrarUso, enviarUso } from "./uso.js";
 import "./ui/rebanho.js";
 import "./ui/previsao.js";
 import "./ui/corte.js";
@@ -16,10 +17,21 @@ const ROTAS = {
 
 // ---------- Rotas ----------
 
+let appContado = false;
+
+function contarAbertura(rota) {
+  if (!appContado) {
+    appContado = true;
+    registrarUso("app", "abrir");
+  }
+  if (rota && rota !== "login" && ROTAS[rota]) registrarUso(rota, "abrir");
+}
+
 function navegar() {
   const rota = location.hash.replace(/^#\/?/, "");
   // Sem sessão, qualquer rota mostra o login; depois de entrar, volta para a rota pedida.
   const destino = precisaLogin() ? ROTAS.login : ((rota !== "login" && ROTAS[rota]) || ROTAS[""]);
+  if (destino !== ROTAS.login) contarAbertura(rota);
   for (const tela of document.querySelectorAll(".tela")) {
     tela.hidden = tela.id !== destino.tela;
   }
@@ -54,10 +66,19 @@ $("btnSair").addEventListener("click", () => {
 
 function atualizarConexao() {
   $("seloOffline").hidden = navigator.onLine;
+  if (navigator.onLine) enviarUso();
 }
 window.addEventListener("online", atualizarConexao);
 window.addEventListener("offline", atualizarConexao);
 atualizarConexao();
+
+// ---------- Contagem de uso ----------
+
+document.addEventListener("ateg-cal:uso", (e) => registrarUso(e.detail.modulo, e.detail.acao));
+// Ao sair do app, tenta enviar o que ficou na fila.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") enviarUso();
+});
 
 // ---------- Início ----------
 
@@ -79,7 +100,7 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
     .then((registro) => {
       // App instalado costuma ficar aberto em segundo plano: procura atualização ao voltar para ele.
       document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible" && navigator.onLine) registro.update().catch(() => {});
+        if (registro && document.visibilityState === "visible" && navigator.onLine) registro.update().catch(() => {});
       });
       return navigator.serviceWorker.ready;
     })

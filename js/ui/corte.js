@@ -20,6 +20,7 @@ import {
   botaoPdf,
   ativarPdf,
   ativarDicas,
+  avisarUso,
 } from "./comum.js";
 
 const CHAVE_STORAGE = "ateg-cal:rebanho-corte";
@@ -121,6 +122,7 @@ form.addEventListener("submit", (e) => {
     return;
   }
   salvarFormulario(form, CHAVE_STORAGE);
+  avisarUso("rebanho-corte", "calcular");
   resultado.innerHTML =
     cabecalhoRelatorio(`Rebanho ideal (corte) — ${FASES[r.fase].toLowerCase()}`, entrada.fazenda) +
     renderizarResultado(r, entrada.fazenda) +
@@ -283,7 +285,7 @@ function renderizarReposicao(r) {
 }
 
 ativarDicas(resultado);
-ativarPdf(resultado, () => ["Rebanho corte", form.elements.fazenda.value.trim()]);
+ativarPdf(resultado, () => ["Rebanho corte", form.elements.fazenda.value.trim()], "rebanho-corte");
 
 preencherPlaceholders();
 restaurarFormulario(form, CHAVE_STORAGE);

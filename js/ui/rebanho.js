@@ -160,7 +160,7 @@ function renderizarComposicao(r) {
     .map(
       (c) =>
         `<span style="flex:${c.quantidade};background:${corCategoria(c.id)}"
-          data-dica="${escapar(c.nome)}: ${fmt(c.inteiro)} cab. (${fmt(pct(c), 0)}%)"></span>`,
+          data-dica="${escapar(c.nome)}: ${fmt(c.inteiro)} animais (${fmt(pct(c), 0)}%)"></span>`,
     )
     .join("");
   const legenda = r.categorias
@@ -196,7 +196,7 @@ function renderizarResultado(r, fazenda) {
   return `
     <h2>Rebanho ideal</h2>
     <p class="sub">${subtitulo}</p>
-    <p class="destaque"><b>${fmt(r.totalInteiro)}</b><span>cabeças no total · ${fmt(r.uaTotal, 1)} UA</span></p>
+    <p class="destaque"><b>${fmt(r.totalInteiro)}</b><span>animais no total ·${fmt(r.uaTotal, 1)} UA</span></p>
     ${renderizarComposicao(r)}
     <h3>Por categoria</h3>
     <table>
@@ -213,10 +213,10 @@ function renderizarResultado(r, fazenda) {
     <div class="indicadores">
       <div class="indicador"><b>${fmt(r.pctLactacaoVacas, 1)}%</b><span>vacas em lactação / total de vacas</span></div>
       <div class="indicador"><b>${fmt(r.pctLactacaoRebanho, 1)}%</b><span>vacas em lactação / rebanho</span></div>
-      <div class="indicador"><b>${fmt(r.uaTotal / r.total, 2)}</b><span>UA por cabeça (450 kg = 1 UA)</span></div>
+      <div class="indicador"><b>${fmt(r.uaTotal / r.total, 2)}</b><span>UA por animal (450 kg = 1 UA)</span></div>
     </div>
     ${r.modo === "indices" ? renderizarReposicao(r) : ""}
-    <p class="nota">Cabeças arredondadas mantendo o total; o número menor mostra o valor calculado.</p>`;
+    <p class="nota">Número de animais arredondado mantendo o total; o número menor mostra o valor calculado.</p>`;
 }
 
 function renderizarReposicao(r) {

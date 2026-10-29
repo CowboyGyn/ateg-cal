@@ -46,17 +46,21 @@ function numero(texto) {
 // ---------- Formulário: meses ----------
 
 function preencherMeses() {
-  for (const nome of ["mesInicio", "mesFim"]) {
-    form.elements[nome].replaceChildren(...NOMES_MESES.map((m, i) => new Option(m, i)));
-  }
+  form.elements.mesInicio.replaceChildren(...NOMES_MESES.map((m, i) => new Option(m, i)));
   form.elements.mesInicio.value = SECA_PADRAO.mesInicio;
-  form.elements.mesFim.value = SECA_PADRAO.mesFim;
 }
 
+const diasInformados = () => numero(form.elements.diasSeca.value) ?? SECA_PADRAO.dias;
+
+// Mostra o período: "1º de maio a 26 de novembro".
 function atualizarDias() {
-  const meses = mesesDaSeca(Number(form.elements.mesInicio.value), Number(form.elements.mesFim.value));
-  const dias = meses.reduce((s, m) => s + m.dias, 0);
-  $("diasSeca").textContent = `${meses.length} ${meses.length === 1 ? "mês" : "meses"} · ${dias} dias de seca`;
+  const dias = diasInformados();
+  if (!(dias >= 30 && dias <= 365)) {
+    $("diasSeca").textContent = "Informe de 30 a 365 dias.";
+    return;
+  }
+  const meses = mesesDaSeca(Number(form.elements.mesInicio.value), dias);
+  $("diasSeca").textContent = `De 1º de ${meses[0].nome.toLowerCase()} a ${meses.at(-1).dias} de ${meses.at(-1).nome.toLowerCase()}`;
 }
 
 // ---------- Itens (categorias e volumosos) ----------
@@ -157,7 +161,7 @@ function estadoAtual() {
   return {
     fazenda: form.elements.fazenda.value,
     mesInicio: form.elements.mesInicio.value,
-    mesFim: form.elements.mesFim.value,
+    diasSeca: form.elements.diasSeca.value,
     pastoPct: form.elements.pastoPct.value,
     lotes: lerItens(listaLotes, CAMPOS_LOTE),
     volumosos: lerItens(listaVolumosos, CAMPOS_VOLUMOSO),
@@ -189,7 +193,7 @@ function restaurar() {
     estado = null;
   }
   if (estado && typeof estado === "object") {
-    for (const n of ["fazenda", "mesInicio", "mesFim", "pastoPct"]) {
+    for (const n of ["fazenda", "mesInicio", "diasSeca", "pastoPct"]) {
       if (typeof estado[n] === "string" && estado[n] !== "") form.elements[n].value = estado[n];
     }
   }
@@ -204,8 +208,8 @@ function mostrarErro(msg) {
   resultado.hidden = true;
 }
 
-form.addEventListener("change", (e) => {
-  if (e.target.name === "mesInicio" || e.target.name === "mesFim") atualizarDias();
+form.addEventListener("input", (e) => {
+  if (e.target.name === "mesInicio" || e.target.name === "diasSeca") atualizarDias();
 });
 
 form.addEventListener("submit", (e) => {
@@ -214,7 +218,7 @@ form.addEventListener("submit", (e) => {
   const estado = estadoAtual();
   const entrada = {
     mesInicio: Number(estado.mesInicio),
-    mesFim: Number(estado.mesFim),
+    diasSeca: diasInformados(),
     pastoPct: numero(estado.pastoPct) ?? 0,
     lotes: estado.lotes.map((l) => ({ tipo: l.tipo, animais: numero(l.animais), pesoKg: numero(l.pesoKg), kgMSDia: numero(l.kgMSDia) })),
     volumosos: estado.volumosos.map((v) => {
@@ -246,7 +250,6 @@ form.addEventListener("submit", (e) => {
 $("btnLimparVolumoso").addEventListener("click", () => {
   form.reset();
   form.elements.mesInicio.value = SECA_PADRAO.mesInicio;
-  form.elements.mesFim.value = SECA_PADRAO.mesFim;
   atualizarDias();
   iniciarListas(null);
   erro.hidden = true;
@@ -261,7 +264,8 @@ $("btnLimparVolumoso").addEventListener("click", () => {
 
 // ---------- Resultado ----------
 
-const periodo = (r) => `${r.meses[0].nome} a ${r.meses.at(-1).nome.toLowerCase()} (${r.dias} dias)`;
+const periodo = (r) =>
+  `${r.dias} dias: 1º de ${r.meses[0].nome.toLowerCase()} a ${r.meses.at(-1).dias} de ${r.meses.at(-1).nome.toLowerCase()}`;
 
 function renderizarResultado(r, fazenda) {
   const necessarioTotal = r.volumosos.reduce((s, v) => s + v.tMNNecessaria, 0);

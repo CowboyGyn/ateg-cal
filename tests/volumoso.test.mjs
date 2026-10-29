@@ -6,15 +6,20 @@ import { calcularRebanhoCorte } from "../js/calc/corte.js";
 
 const perto = (a, b, tol = 0.01) => assert.ok(Math.abs(a - b) <= tol, `${a} != ${b}`);
 
-test("meses da seca: maio a outubro e virada do ano", () => {
-  const seca = mesesDaSeca(4, 9);
-  assert.equal(seca.length, 6);
-  assert.equal(seca.reduce((s, m) => s + m.dias, 0), 184);
-  assert.deepEqual(mesesDaSeca(10, 1).map((m) => m.nome), ["Novembro", "Dezembro", "Janeiro", "Fevereiro"]);
+test("meses da seca: padrão de 210 dias a partir de maio, último mês parcial e virada do ano", () => {
+  const seca = mesesDaSeca(4, 210);
+  assert.deepEqual(seca.map((m) => m.nome), ["Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro"]);
+  assert.equal(seca.reduce((s, m) => s + m.dias, 0), 210);
+  assert.deepEqual([seca.at(-1).dias, seca.at(-1).parcial], [26, true]);
+  assert.equal(mesesDaSeca(4, 184).length, 6);
+  assert.deepEqual(mesesDaSeca(10, 120).map((m) => m.nome), ["Novembro", "Dezembro", "Janeiro", "Fevereiro"]);
+  const r = calcularVolumosoSeca({ lotes: [{ tipo: "matrizes", animais: 1 }], volumosos: [{ tipo: "feno" }] });
+  assert.equal(r.dias, 210);
 });
 
 test("silagem de milho para 20 vacas em lactação", () => {
   const r = calcularVolumosoSeca({
+    diasSeca: 184,
     lotes: [{ tipo: "vacas-lactacao", animais: 20 }],
     volumosos: [{ tipo: "silagem-milho" }],
   });
@@ -46,7 +51,7 @@ test("pasto reduz o cocho e participações vazias dividem o resto", () => {
 });
 
 test("estoque: falta, sobra e mês em que acaba", () => {
-  const base = { lotes: [{ tipo: "vacas-secas", animais: 10, kgMSDia: 10 }], volumosos: [] };
+  const base = { diasSeca: 184, lotes: [{ tipo: "vacas-secas", animais: 10, kgMSDia: 10 }], volumosos: [] };
   // 10 × 10 kg × 184 d = 18,4 t MS; silagem 33% MS e 15% de perdas
   const necessario = 18.4 / 0.33 / 0.85;
   let r = calcularVolumosoSeca({ ...base, volumosos: [{ tipo: "silagem-milho", estoqueT: 30 }] });
@@ -94,4 +99,5 @@ test("validações", () => {
   assert.throws(() => calcularVolumosoSeca({ lotes, volumosos: [{ tipo: "feno", participacaoPct: 60 }, { tipo: "cana", participacaoPct: 30 }] }), /somam 90%/);
   assert.throws(() => calcularVolumosoSeca({ lotes, volumosos: [{ tipo: "feno" }, { tipo: "feno" }] }), /mais de uma vez/);
   assert.throws(() => calcularVolumosoSeca({ lotes, pastoPct: 100, volumosos: [{ tipo: "feno" }] }), /pasto fornece 100%/);
+  assert.throws(() => calcularVolumosoSeca({ lotes, diasSeca: 400, volumosos: [{ tipo: "feno" }] }), /Dias de seca/);
 });

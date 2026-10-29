@@ -5,7 +5,7 @@ export const NOMES_MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "
   "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const DIAS_MES = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-export const SECA_PADRAO = { mesInicio: 4, mesFim: 9 }; // maio a outubro
+export const SECA_PADRAO = { mesInicio: 4, dias: 210 }; // a partir de 1º de maio
 
 // Categorias: peso vivo (kg), consumo de MS (% do PV) e parte do consumo que é volumoso (%).
 export const CATEGORIAS = {
@@ -41,13 +41,16 @@ export const kgVolumosoPadrao = (tipo, pesoKg) => {
   return pesoKg * (c.consumoPct / 100) * (c.volumosoPct / 100);
 };
 
-// Meses da seca, do início ao fim (passa da virada do ano se precisar).
-export function mesesDaSeca(mesInicio, mesFim) {
-  const n = ((mesFim - mesInicio + 12) % 12) + 1;
-  return Array.from({ length: n }, (_, i) => {
-    const mes = (mesInicio + i) % 12;
-    return { mes, nome: NOMES_MESES[mes], dias: DIAS_MES[mes] };
-  });
+// Meses da seca a partir do dia 1º do mês de início; o último mês entra só com os dias que faltam.
+export function mesesDaSeca(mesInicio, dias) {
+  const meses = [];
+  let resta = Math.round(dias);
+  for (let mes = mesInicio; resta > 0; mes = (mes + 1) % 12) {
+    const noMes = Math.min(resta, DIAS_MES[mes]);
+    meses.push({ mes, nome: NOMES_MESES[mes], dias: noMes, parcial: noMes < DIAS_MES[mes] });
+    resta -= noMes;
+  }
+  return meses;
 }
 
 function exigirNumero(valor, nome, min, max) {
@@ -69,14 +72,14 @@ function distribuirParticipacao(volumosos) {
   return volumosos.map((v) => (vazio(v.participacaoPct) ? resto : v.participacaoPct));
 }
 
-export function calcularVolumosoSeca({ mesInicio = SECA_PADRAO.mesInicio, mesFim = SECA_PADRAO.mesFim,
+export function calcularVolumosoSeca({ mesInicio = SECA_PADRAO.mesInicio, diasSeca = SECA_PADRAO.dias,
   lotes = [], pastoPct = 0, volumosos = [] }) {
   exigirNumero(mesInicio, "Início da seca", 0, 11);
-  exigirNumero(mesFim, "Fim da seca", 0, 11);
+  exigirNumero(diasSeca, "Dias de seca", 30, 365);
   exigirNumero(pastoPct, "Volumoso que vem do pasto (%)", 0, 100);
   if (pastoPct >= 100) throw new Error("Se o pasto fornece 100% do volumoso, não há o que planejar para o cocho.");
 
-  const meses = mesesDaSeca(mesInicio, mesFim);
+  const meses = mesesDaSeca(mesInicio, diasSeca);
   const dias = meses.reduce((s, m) => s + m.dias, 0);
 
   // ---------- Demanda do rebanho ----------

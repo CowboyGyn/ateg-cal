@@ -200,7 +200,7 @@ function renderizarResultado(r, fazenda) {
     ${renderizarComposicao(r)}
     <h3>Por categoria</h3>
     <table>
-      <thead><tr><th>Categoria</th><th>Cabeças</th><th>UA</th></tr></thead>
+      <thead><tr><th>Categoria</th><th>Animais</th><th>UA</th></tr></thead>
       <tbody>${linhas}</tbody>
       <tfoot>
         <tr>

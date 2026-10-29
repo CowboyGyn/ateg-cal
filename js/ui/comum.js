@@ -6,7 +6,13 @@ export const $ = (id) => document.getElementById(id);
 export const fmt = (v, casas = 0) =>
   v.toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
 
-export const escapar = (s) =>
+// Quantidade inteira de animais nos avisos ("1 novilha", "4 novilhas"); nunca mostra zero.
+export function fmtAnimais(v, nome = "novilha") {
+  const n = Math.max(1, Math.round(v));
+  return `${fmt(n)} ${nome}${n === 1 ? "" : "s"}`;
+}
+
+export const escapar =(s) =>
   String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
 export const dataHoje = () => new Date().toLocaleDateString("pt-BR");

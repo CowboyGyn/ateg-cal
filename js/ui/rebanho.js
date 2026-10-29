@@ -8,6 +8,7 @@ import {
 import {
   $,
   fmt,
+  fmtAnimais,
   escapar,
   lerNumero as lerCampo,
   salvarFormulario,
@@ -225,18 +226,18 @@ function renderizarReposicao(r) {
     ["Novilhas necessárias por ano (descarte)", rep.necessariaAno],
     ["Novilhas possíveis por ano (recriando todas)", rep.possivelAno],
   ]
-    .map(([nome, v]) => `<tr><td>${nome}</td><td>${fmt(v, 1)}</td></tr>`)
+    .map(([nome, v]) => `<tr><td>${nome}</td><td>${fmt(v)}</td></tr>`)
     .join("");
 
   let aviso;
   if (rep.saldoAno < -0.05) {
-    aviso = `<p class="aviso atencao">Déficit de reposição: faltam cerca de ${fmt(-rep.saldoAno, 1)} novilhas por ano
+    aviso = `<p class="aviso atencao">Déficit de reposição: faltam cerca de ${fmtAnimais(-rep.saldoAno)} por ano
       para repor o descarte. Reveja descarte, mortalidade, IEP ou planeje a compra de animais.</p>`;
   } else if (r.premissas.recria === "reposicao" && rep.femeasNaoRecriadasAno > 0.05) {
-    aviso = `<p class="aviso ok">Sobram cerca de ${fmt(rep.femeasNaoRecriadasAno, 1)} bezerras por ano além da
-      reposição, que podem ser vendidas.</p>`;
+    aviso = `<p class="aviso ok">Sobram cerca de ${fmtAnimais(rep.femeasNaoRecriadasAno, "bezerra")} por ano além da
+      reposição, para venda.</p>`;
   } else if (r.premissas.recria === "todas" && rep.saldoAno > 0.05) {
-    aviso = `<p class="aviso ok">Recriando todas as fêmeas, sobram cerca de ${fmt(rep.saldoAno, 1)} novilhas por ano
+    aviso = `<p class="aviso ok">Recriando todas as fêmeas, sobram cerca de ${fmtAnimais(rep.saldoAno)} por ano
       além da reposição, para venda ou crescimento do rebanho.</p>`;
   } else {
     aviso = `<p class="aviso ok">A recria cobre a reposição do rebanho.</p>`;

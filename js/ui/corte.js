@@ -9,6 +9,7 @@ import {
 import {
   $,
   fmt,
+  fmtAnimais,
   escapar,
   lerNumero as lerCampo,
   salvarFormulario,
@@ -245,14 +246,14 @@ function renderizarResultado(r, fazenda) {
 
 function renderizarVendas(r) {
   const linhas = r.vendas
-    .map((v) => `<tr><td>${escapar(v.nome)}</td><td>${fmt(v.cabecas, 1)}</td><td>${fmt(v.kgTotal, 0)}</td></tr>`)
+    .map((v) => `<tr><td>${escapar(v.nome)}</td><td>${fmt(v.cabecas)}</td><td>${fmt(v.kgTotal, 0)}</td></tr>`)
     .join("");
   return `
     <h3>Vendas por ano</h3>
     <table>
       <thead><tr><th>Categoria</th><th>Cabeças</th><th>kg vivo</th></tr></thead>
       <tbody>${linhas}</tbody>
-      <tfoot><tr><td>Total</td><td>${fmt(r.totalVendidos, 1)}</td><td>${fmt(r.kgVendidos, 0)}</td></tr></tfoot>
+      <tfoot><tr><td>Total</td><td>${fmt(r.totalVendidos)}</td><td>${fmt(r.kgVendidos, 0)}</td></tr></tfoot>
     </table>`;
 }
 
@@ -264,16 +265,16 @@ function renderizarReposicao(r) {
     ["Novilhas necessárias por ano (descarte)", rep.necessariaAno],
     ["Novilhas possíveis por ano (recriando todas)", rep.possivelAno],
   ]
-    .map(([nome, v]) => `<tr><td>${nome}</td><td>${fmt(v, 1)}</td></tr>`)
+    .map(([nome, v]) => `<tr><td>${nome}</td><td>${fmt(v)}</td></tr>`)
     .join("");
 
   let aviso;
   if (rep.compraAno > 0.05) {
-    aviso = `<p class="aviso atencao">Déficit de reposição: faltam cerca de ${fmt(rep.compraAno, 1)} novilhas por ano
+    aviso = `<p class="aviso atencao">Déficit de reposição: faltam cerca de ${fmtAnimais(rep.compraAno)} por ano
       para repor o descarte. Reveja natalidade, mortalidade e descarte ou planeje a compra de novilhas.</p>`;
   } else if (rep.femeasExcedentes > 0.05) {
-    aviso = `<p class="aviso ok">A reposição está garantida e sobram cerca de ${fmt(rep.femeasExcedentes, 1)} bezerras
-      por ano, que entram nas vendas.</p>`;
+    aviso = `<p class="aviso ok">A reposição está garantida e sobram cerca de ${fmtAnimais(rep.femeasExcedentes, "bezerra")}
+      por ano para venda.</p>`;
   } else {
     aviso = `<p class="aviso ok">A recria cobre a reposição do rebanho.</p>`;
   }

@@ -9,6 +9,7 @@ import {
   $,
   fmt,
   fmtAnimais,
+  inteiroComDecimal,
   escapar,
   lerNumero as lerCampo,
   salvarFormulario,
@@ -226,7 +227,7 @@ function renderizarReposicao(r) {
     ["Novilhas necessárias por ano (descarte)", rep.necessariaAno],
     ["Novilhas possíveis por ano (recriando todas)", rep.possivelAno],
   ]
-    .map(([nome, v]) => `<tr><td>${nome}</td><td>${fmt(v)}</td></tr>`)
+    .map(([nome, v]) => `<tr><td>${nome}</td><td>${inteiroComDecimal(v)}</td></tr>`)
     .join("");
 
   let aviso;

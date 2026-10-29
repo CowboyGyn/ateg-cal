@@ -6,6 +6,9 @@ export const $ = (id) => document.getElementById(id);
 export const fmt = (v, casas = 0) =>
   v.toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
 
+// Número inteiro em destaque com o valor calculado (1 casa) logo abaixo, como na tabela por categoria.
+export const inteiroComDecimal = (v) => `${fmt(Math.round(v))}<span class="decimal">${fmt(v, 1)}</span>`;
+
 // Quantidade inteira de animais nos avisos ("1 novilha", "4 novilhas"); nunca mostra zero.
 export function fmtAnimais(v, nome = "novilha") {
   const n = Math.max(1, Math.round(v));

@@ -10,6 +10,7 @@ import {
   $,
   fmt,
   fmtAnimais,
+  inteiroComDecimal,
   escapar,
   lerNumero as lerCampo,
   salvarFormulario,
@@ -246,14 +247,14 @@ function renderizarResultado(r, fazenda) {
 
 function renderizarVendas(r) {
   const linhas = r.vendas
-    .map((v) => `<tr><td>${escapar(v.nome)}</td><td>${fmt(v.cabecas)}</td><td>${fmt(v.kgTotal, 0)}</td></tr>`)
+    .map((v) => `<tr><td>${escapar(v.nome)}</td><td>${inteiroComDecimal(v.cabecas)}</td><td>${fmt(v.kgTotal, 0)}</td></tr>`)
     .join("");
   return `
     <h3>Vendas por ano</h3>
     <table>
       <thead><tr><th>Categoria</th><th>Cabeças</th><th>kg vivo</th></tr></thead>
       <tbody>${linhas}</tbody>
-      <tfoot><tr><td>Total</td><td>${fmt(r.totalVendidos)}</td><td>${fmt(r.kgVendidos, 0)}</td></tr></tfoot>
+      <tfoot><tr><td>Total</td><td>${inteiroComDecimal(r.totalVendidos)}</td><td>${fmt(r.kgVendidos, 0)}</td></tr></tfoot>
     </table>`;
 }
 
@@ -265,7 +266,7 @@ function renderizarReposicao(r) {
     ["Novilhas necessárias por ano (descarte)", rep.necessariaAno],
     ["Novilhas possíveis por ano (recriando todas)", rep.possivelAno],
   ]
-    .map(([nome, v]) => `<tr><td>${nome}</td><td>${fmt(v)}</td></tr>`)
+    .map(([nome, v]) => `<tr><td>${nome}</td><td>${inteiroComDecimal(v)}</td></tr>`)
     .join("");
 
   let aviso;

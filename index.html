@@ -148,6 +148,108 @@
       </div>
     </section>
 
+    <!-- Volumoso para a seca -->
+    <section id="tela-volumoso-seca" class="tela" hidden>
+      <form id="formVolumoso" novalidate>
+        <div class="cartao">
+          <label class="campo">
+            <span>Propriedade</span>
+            <input name="fazenda" type="text" autocomplete="off" placeholder="Nome da fazenda">
+          </label>
+          <div class="grade">
+            <label class="campo"><span>Início da seca</span><select name="mesInicio"></select></label>
+            <label class="campo"><span>Fim da seca</span><select name="mesFim"></select></label>
+          </div>
+          <p id="diasSeca" class="nota"></p>
+        </div>
+
+        <div class="cartao">
+          <div class="cartao-titulo">
+            <strong>Rebanho na seca</strong>
+            <span>Animais que vão comer volumoso. Peso e consumo vazios usam a referência.</span>
+          </div>
+          <div class="importar">
+            <button type="button" id="btnImportarLeite" class="secundario">Trazer Rebanho ideal — leite</button>
+            <button type="button" id="btnImportarCorte" class="secundario">Trazer Rebanho ideal — corte</button>
+          </div>
+          <div id="listaLotes" class="lista-itens"></div>
+          <button type="button" id="btnAddLote" class="link">+ Adicionar categoria</button>
+        </div>
+
+        <div class="cartao">
+          <div class="cartao-titulo">
+            <strong>Pasto na seca (opcional)</strong>
+            <span>Quanto do volumoso o pasto diferido ou residual ainda fornece.</span>
+          </div>
+          <label class="campo"><span>Volumoso que vem do pasto (%)</span>
+            <input name="pastoPct" type="number" inputmode="decimal" min="0" max="99" step="1" placeholder="0"></label>
+        </div>
+
+        <div class="cartao">
+          <div class="cartao-titulo">
+            <strong>Volumosos do cocho</strong>
+            <span>Participação vazia divide igualmente o que falta para 100%.</span>
+          </div>
+          <div id="listaVolumosos" class="lista-itens"></div>
+          <button type="button" id="btnAddVolumoso" class="link">+ Adicionar volumoso</button>
+        </div>
+
+        <p id="erroVolumoso" class="erro" role="alert" hidden></p>
+
+        <div class="acoes">
+          <button type="submit" class="primario">Calcular</button>
+          <button type="button" id="btnLimparVolumoso" class="secundario">Limpar</button>
+        </div>
+      </form>
+
+      <div id="resultadoVolumoso" class="resultado" hidden></div>
+
+      <template id="modeloLote">
+        <div class="item">
+          <div class="item-topo">
+            <select data-campo="tipo" aria-label="Categoria"></select>
+            <button type="button" class="remover" aria-label="Remover categoria">&#10005;</button>
+          </div>
+          <div class="grade grade-3">
+            <label class="campo"><span>Animais</span>
+              <input data-campo="animais" type="number" inputmode="numeric" min="0" step="1"></label>
+            <label class="campo"><span>Peso (kg)</span>
+              <input data-campo="pesoKg" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span>Volumoso (kg MS/dia)</span>
+              <input data-campo="kgMSDia" type="number" inputmode="decimal" step="0.1"></label>
+          </div>
+        </div>
+      </template>
+
+      <template id="modeloVolumoso">
+        <div class="item">
+          <div class="item-topo">
+            <select data-campo="tipo" aria-label="Volumoso"></select>
+            <button type="button" class="remover" aria-label="Remover volumoso">&#10005;</button>
+          </div>
+          <div class="grade">
+            <label class="campo"><span>Participação (% da MS)</span>
+              <input data-campo="participacaoPct" type="number" inputmode="decimal" step="1"></label>
+            <label class="campo"><span>Estoque atual (t)</span>
+              <input data-campo="estoqueT" type="number" inputmode="decimal" step="0.1" placeholder="0"></label>
+          </div>
+          <details class="pesos">
+            <summary>Ajustar índices</summary>
+            <div class="grade">
+              <label class="campo"><span>Matéria seca (%)</span>
+                <input data-campo="msPct" type="number" inputmode="decimal" step="0.1"></label>
+              <label class="campo"><span>Produtividade (t/ha)</span>
+                <input data-campo="produtividadeT" type="number" inputmode="decimal" step="0.1"></label>
+              <label class="campo"><span>Perdas até o cocho (%)</span>
+                <input data-campo="perdasPct" type="number" inputmode="decimal" step="0.1"></label>
+              <label class="campo"><span>Custo (R$/t)</span>
+                <input data-campo="custoT" type="number" inputmode="decimal" step="1"></label>
+            </div>
+          </details>
+        </div>
+      </template>
+    </section>
+
     <!-- Termos de uso e Política de privacidade (leitura e aceite) -->
     <section id="tela-termos" class="tela" hidden>
       <div id="avisoAceite" class="aviso atencao" hidden>
@@ -295,6 +397,17 @@
             <span class="modulo-tag">Corte</span>
             <strong>Rebanho de corte</strong>
             <span class="modulo-desc">Cria, recria ou ciclo completo a partir das matrizes.</span>
+          </span>
+          <span class="modulo-seta" aria-hidden="true">&#8250;</span>
+        </a>
+        <a class="modulo forragem" href="#/volumoso-seca">
+          <span class="modulo-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 21V10"/><path d="M12 13c-4 0-6-3-6-7 4 0 6 3 6 7z"/><path d="M12 11c0-4 2.5-7 6.5-7 0 4-2.5 7-6.5 7z"/><path d="M5 21h14"/></svg>
+          </span>
+          <span class="modulo-corpo">
+            <span class="modulo-tag">Leite e corte</span>
+            <strong>Volumoso para a seca</strong>
+            <span class="modulo-desc">Silagem, cana, feno: quanto produzir, área, silo e custo.</span>
           </span>
           <span class="modulo-seta" aria-hidden="true">&#8250;</span>
         </a>

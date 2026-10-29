@@ -69,6 +69,32 @@ export function restaurarFormulario(form, chave) {
   }
 }
 
+// Último resultado do Rebanho ideal (leite ou corte), para outros módulos aproveitarem.
+const chaveUltimoRebanho = (origem) => `ateg-cal:ultimo-rebanho-${origem}`;
+
+export function guardarUltimoRebanho(origem, fazenda, r) {
+  const dados = {
+    fazenda,
+    fase: r.fase ?? null,
+    data: dataHoje(),
+    categorias: r.categorias.map((c) => ({ id: c.id, grupo: c.grupo ?? null, quantidade: c.quantidade, pesoKg: c.pesoKg })),
+  };
+  try {
+    localStorage.setItem(chaveUltimoRebanho(origem), JSON.stringify(dados));
+  } catch {
+    // Sem armazenamento: o botão de trazer o rebanho fica indisponível.
+  }
+}
+
+export function lerUltimoRebanho(origem) {
+  try {
+    const dados = JSON.parse(localStorage.getItem(chaveUltimoRebanho(origem)));
+    return dados && Array.isArray(dados.categorias) ? dados : null;
+  } catch {
+    return null;
+  }
+}
+
 export function esquecerFormulario(chave) {
   try {
     localStorage.removeItem(chave);

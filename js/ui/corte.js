@@ -23,6 +23,7 @@ import {
   ativarPdf,
   ativarDicas,
   avisarUso,
+  guardarUltimoRebanho,
 } from "./comum.js";
 
 const CHAVE_STORAGE = "ateg-cal:rebanho-corte";
@@ -125,6 +126,7 @@ form.addEventListener("submit", (e) => {
   }
   salvarFormulario(form, CHAVE_STORAGE);
   avisarUso("rebanho-corte", "calcular");
+  guardarUltimoRebanho("corte", entrada.fazenda, r);
   resultado.innerHTML =
     cabecalhoRelatorio(`Rebanho ideal (corte) — ${FASES[r.fase].toLowerCase()}`, entrada.fazenda) +
     renderizarResultado(r, entrada.fazenda) +

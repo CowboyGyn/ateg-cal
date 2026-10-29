@@ -15,6 +15,7 @@ import { registrarUso, enviarUso } from "./uso.js";
 import "./ui/rebanho.js";
 import "./ui/previsao.js";
 import "./ui/corte.js";
+import "./ui/volumoso.js";
 
 const ROTAS = {
   "": { tela: "tela-inicio", titulo: "ATeG Cal" },
@@ -22,6 +23,7 @@ const ROTAS = {
   "rebanho-leite": { tela: "tela-rebanho-leite", titulo: "Rebanho ideal — leite" },
   "previsao-leite": { tela: "tela-previsao-leite", titulo: "Previsão de leite" },
   "rebanho-corte": { tela: "tela-rebanho-corte", titulo: "Rebanho ideal — corte" },
+  "volumoso-seca": { tela: "tela-volumoso-seca", titulo: "Volumoso para a seca" },
   termos: { tela: "tela-termos", titulo: "Termos e privacidade" },
 };
 

@@ -243,6 +243,7 @@ button.primario:disabled { opacity: 0.7; cursor: progress; }
   transition: transform 0.12s ease;
 }
 .modulo.corte { --cor-modulo: #b4561f; }
+.modulo.forragem { --cor-modulo: #6f8a12; }
 .modulo.economico { --cor-modulo: #2a6fb8; }
 a.modulo:active { transform: scale(0.985); background: var(--verde-claro); }
 .modulo-icone {
@@ -334,6 +335,29 @@ input[name="vacas"] { font-size: 1.25rem; font-weight: 600; }
   border-radius: var(--raio);
   background: var(--superficie);
 }
+.importar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.importar button { min-height: 44px; font-size: 0.82rem; padding: 6px 8px; }
+.importar button:disabled { opacity: 0.45; }
+.lista-itens { display: grid; gap: 10px; }
+.item { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--borda); border-radius: 12px; }
+.item-topo { display: flex; gap: 8px; align-items: center; }
+.item-topo select { flex: 1; font-weight: 600; }
+.remover {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: none;
+  color: var(--texto-suave);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.grade.grade-3 { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grade-3 .campo > span { font-size: 0.78rem; }
+.item .pesos summary { font-size: 0.9rem; }
+.resultado h4 { margin: 16px 0 4px; font-size: 0.98rem; }
+.resultado h4 small { font-weight: 400; color: var(--texto-suave); }
 .segmentado.tres { grid-template-columns: repeat(3, 1fr); }
 .segmentado.tres span { font-size: 0.9rem; padding: 10px 4px; }
 #blocoSaida { margin-top: 12px; }

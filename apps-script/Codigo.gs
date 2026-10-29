@@ -17,9 +17,10 @@
  *   1.2.0 — 28/10/2026 — contagem de uso dos módulos nas abas "Uso" e "Resumo de uso".
  *   1.3.0 — 28/10/2026 — aceite dos Termos de uso: colunas "Termos aceitos em" e
  *                        "Versão dos termos", gravadas no cadastro e pela ação "aceite".
+ *   1.4.0 — 29/10/2026 — contagem de uso do módulo "Volumoso para a seca".
  */
 
-const VERSAO = "1.3.0";
+const VERSAO = "1.4.0";
 const PLANILHA_ID = "1SFTDBS8Jiz3yPBbbdkgb8MkWZCbKU9Ed8wjDxNR7pAA";
 const ABA = ""; // vazio = primeira aba
 const MAX_TENTATIVAS = 5;
@@ -51,6 +52,7 @@ const MODULOS_USO = {
   "rebanho-leite": "Rebanho ideal — leite",
   "previsao-leite": "Previsão de leite",
   "rebanho-corte": "Rebanho ideal — corte",
+  "volumoso-seca": "Volumoso para a seca",
 };
 const ACOES_USO = { abrir: "Abriu", calcular: "Calculou", pdf: "Exportou PDF" };
 const MAX_EVENTOS_ENVIO = 100;

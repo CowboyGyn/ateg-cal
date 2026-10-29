@@ -191,7 +191,7 @@ function renderizarComposicao(r) {
     .map(
       (x) =>
         `<span style="flex:${x.quantidade};background:${GRUPOS[x.g].cor}"
-          data-dica="${escapar(x.nome)}: ${fmt(x.inteiro)} cab. (${fmt(pct(x), 0)}%)"></span>`,
+          data-dica="${escapar(x.nome)}: ${fmt(x.inteiro)} animais (${fmt(pct(x), 0)}%)"></span>`,
     )
     .join("");
   const legenda = grupos
@@ -219,7 +219,7 @@ function renderizarResultado(r, fazenda) {
   return `
     <h2>Rebanho ideal</h2>
     <p class="sub">${subtitulo}</p>
-    <p class="destaque"><b>${fmt(r.totalInteiro)}</b><span>cabeças no total · ${fmt(r.uaTotal, 1)} UA</span></p>
+    <p class="destaque"><b>${fmt(r.totalInteiro)}</b><span>animais no total ·${fmt(r.uaTotal, 1)} UA</span></p>
     ${renderizarComposicao(r)}
     <h3>Por categoria</h3>
     <table>
@@ -239,11 +239,11 @@ function renderizarResultado(r, fazenda) {
       <div class="indicador"><b>${fmt(r.desfrutePct, 1)}%</b><span>taxa de desfrute (vendas − compras / rebanho)</span></div>
       <div class="indicador"><b>${fmt(r.pctMatrizes, 1)}%</b><span>matrizes no rebanho</span></div>
       <div class="indicador"><b>${fmt(r.kgVendidoPorMatriz, 0)} kg</b><span>de peso vivo vendido por matriz/ano</span></div>
-      <div class="indicador"><b>${fmt(r.uaTotal / r.total, 2)}</b><span>UA por cabeça (450 kg = 1 UA)</span></div>
+      <div class="indicador"><b>${fmt(r.uaTotal / r.total, 2)}</b><span>UA por animal (450 kg = 1 UA)</span></div>
     </div>
     ${renderizarVendas(r)}
     ${renderizarReposicao(r)}
-    <p class="nota">Rebanho estabilizado: o mesmo tamanho ano após ano. Cabeças arredondadas mantendo o total;
+    <p class="nota">Rebanho estabilizado: o mesmo tamanho ano após ano. Número de animais arredondado mantendo o total;
       o número menor mostra o valor calculado.</p>`;
 }
 
@@ -254,7 +254,7 @@ function renderizarVendas(r) {
   return `
     <h3>Vendas por ano</h3>
     <table>
-      <thead><tr><th>Categoria</th><th>Cabeças</th><th>kg vivo</th></tr></thead>
+      <thead><tr><th>Categoria</th><th>Animais</th><th>kg vivo</th></tr></thead>
       <tbody>${linhas}</tbody>
       <tfoot><tr><td>Total</td><td>${inteiroComDecimal(r.totalVendidos)}</td><td>${fmt(r.kgVendidos, 0)}</td></tr></tfoot>
     </table>`;

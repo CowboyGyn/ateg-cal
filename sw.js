@@ -1,6 +1,6 @@
 // Cache dos arquivos do app para uso offline no campo.
 // Ao alterar qualquer arquivo listado, incremente a versão.
-const VERSAO = "ateg-cal-v24";
+const VERSAO = "ateg-cal-v25";
 const ARQUIVOS = [
   "./",
   "index.html",
@@ -14,6 +14,7 @@ const ARQUIVOS = [
   "js/ui/previsao.js",
   "js/ui/corte.js",
   "js/ui/volumoso.js",
+  "js/ui/convite.js",
   "js/calc/rebanho.js",
   "js/calc/previsao.js",
   "js/calc/corte.js",
@@ -28,6 +29,8 @@ const ARQUIVOS = [
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/icon-maskable-512.png",
+  "convite/instalar-android.png",
+  "convite/instalar-iphone.png",
 ];
 
 self.addEventListener("install", (e) => {

@@ -218,6 +218,24 @@ button.primario:disabled { opacity: 0.7; cursor: progress; }
   .capa { flex-direction: column; text-align: center; }
 }
 
+.convidar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 12px;
+  background: #0f7d41;
+  color: #fff;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.convidar svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
 .secao {
   margin: 22px 2px 10px;
   font-size: 0.8rem;

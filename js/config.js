@@ -10,5 +10,8 @@ export const TERMOS_VERSAO = "1.0";
 
 export const DIAS_SESSAO = 30;
 
+// Endereço público do app, usado no convite pelo WhatsApp.
+export const APP_URL = "https://cowboygyn.github.io/ateg-cal/";
+
 // WhatsApp que recebe os pedidos de "Esqueci a senha".
 export const WHATSAPP_SUPORTE = "5562991176151";

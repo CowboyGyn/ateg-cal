@@ -16,6 +16,7 @@ import "./ui/rebanho.js";
 import "./ui/previsao.js";
 import "./ui/corte.js";
 import "./ui/volumoso.js";
+import "./ui/convite.js";
 
 const ROTAS = {
   "": { tela: "tela-inicio", titulo: "ATeG Cal" },

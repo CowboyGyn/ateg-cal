@@ -1,0 +1,118 @@
+<!doctype html>
+<!-- Cards "Como instalar" enviados no convite. Para gerar as imagens: python arte/gerar_cartoes.py -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Cards de instalação</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #888; font-family: "Segoe UI", Roboto, Arial, sans-serif; }
+  .cartao {
+    display: flex;
+    flex-direction: column;
+    width: 1080px;
+    height: 1350px;
+    margin-bottom: 40px;
+    padding: 56px 60px 52px;
+    background:
+      radial-gradient(120% 60% at 100% 0%, rgb(79 196 108 / 0.35), transparent 60%),
+      linear-gradient(160deg, #041a0b, #0f4022 60%, #1b5e32);
+    color: #fff;
+  }
+  .topo { display: flex; align-items: center; gap: 32px; }
+  .topo img { width: 170px; height: 170px; border-radius: 34px; }
+  .topo h1 { margin: 0; font-size: 66px; font-weight: 800; line-height: 1.08; }
+  .topo p { margin: 10px 0 0; font-size: 40px; font-weight: 600; color: #b9f0c9; }
+  .passos { display: grid; flex: 1; gap: 22px; margin: 40px 0 34px; padding: 0; list-style: none; }
+  .passos li {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding: 22px 34px;
+    border-radius: 30px;
+    background: #fff;
+    color: #1c2321;
+    font-size: 41px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .num {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    background: #1f6b3a;
+    color: #fff;
+    font-size: 48px;
+    font-weight: 800;
+  }
+  .passos b { color: #1f6b3a; font-weight: 800; }
+  .passos small { display: block; margin-top: 6px; color: #5b6661; font-size: 31px; font-weight: 500; }
+  .simbolo { display: inline-block; width: 44px; height: 44px; vertical-align: -9px; }
+  .simbolo * { fill: none; stroke: #1f6b3a; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .rodape { text-align: center; }
+  .rodape p { margin: 0 0 14px; font-size: 36px; color: #dff3e5; }
+  .rodape strong {
+    display: block;
+    padding: 18px 12px;
+    border-radius: 22px;
+    background: rgb(255 255 255 / 0.14);
+    font-size: 41px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+</style>
+</head>
+<body>
+  <section class="cartao" id="android">
+    <div class="topo">
+      <img src="../icons/logo-280.png" alt="">
+      <div>
+        <h1>Como instalar o ATeG Cal</h1>
+        <p>Celular Android</p>
+      </div>
+    </div>
+    <ol class="passos">
+      <li><span class="num">1</span><span>Abra o link no <b>Google Chrome</b></span></li>
+      <li><span class="num">2</span><span>Toque nos <b>três pontinhos</b>
+        <svg class="simbolo" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg>
+        no alto da tela</span></li>
+      <li><span class="num">3</span><span>Toque em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b></span></li>
+      <li><span class="num">4</span><span>Confirme em <b>Instalar</b>
+        <small>Se pedir, toque em Adicionar de novo.</small></span></li>
+      <li><span class="num">5</span><span>Abra pelo <b>ícone do ATeG Cal</b> e faça seu cadastro</span></li>
+    </ol>
+    <div class="rodape">
+      <p>O link está na mensagem. Se precisar, digite:</p>
+      <strong>cowboygyn.github.io/ateg-cal</strong>
+    </div>
+  </section>
+
+  <section class="cartao" id="iphone">
+    <div class="topo">
+      <img src="../icons/logo-280.png" alt="">
+      <div>
+        <h1>Como instalar o ATeG Cal</h1>
+        <p>iPhone</p>
+      </div>
+    </div>
+    <ol class="passos">
+      <li><span class="num">1</span><span>Abra o link no <b>Safari</b>
+        <small>Fora da navegação privada.</small></span></li>
+      <li><span class="num">2</span><span>Toque em <b>Compartilhar</b>
+        <svg class="simbolo" viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M8 10H6a1.5 1.5 0 0 0-1.5 1.5v8A1.5 1.5 0 0 0 6 21h12a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 18 10h-2"/></svg>
+        <small>Se não aparecer, ele fica no menu dos três pontinhos ···</small></span></li>
+      <li><span class="num">3</span><span>Role para baixo e toque em <b>Adicionar à Tela de Início</b></span></li>
+      <li><span class="num">4</span><span>Toque em <b>Adicionar</b>
+        <small>Deixe ativado “Abrir como App Web”, se aparecer.</small></span></li>
+      <li><span class="num">5</span><span>Abra pelo <b>ícone do ATeG Cal</b> e faça seu cadastro</span></li>
+    </ol>
+    <div class="rodape">
+      <p>O link está na mensagem. Se precisar, digite:</p>
+      <strong>cowboygyn.github.io/ateg-cal</strong>
+    </div>
+  </section>
+</body>
+</html>

@@ -18,9 +18,10 @@
  *   1.3.0 — 28/10/2026 — aceite dos Termos de uso: colunas "Termos aceitos em" e
  *                        "Versão dos termos", gravadas no cadastro e pela ação "aceite".
  *   1.4.0 — 29/10/2026 — contagem de uso do módulo "Volumoso para a seca".
+ *   1.5.0 — 31/10/2026 — contagem dos convites enviados pelo WhatsApp.
  */
 
-const VERSAO = "1.4.0";
+const VERSAO = "1.5.0";
 const PLANILHA_ID = "1SFTDBS8Jiz3yPBbbdkgb8MkWZCbKU9Ed8wjDxNR7pAA";
 const ABA = ""; // vazio = primeira aba
 const MAX_TENTATIVAS = 5;
@@ -53,8 +54,9 @@ const MODULOS_USO = {
   "previsao-leite": "Previsão de leite",
   "rebanho-corte": "Rebanho ideal — corte",
   "volumoso-seca": "Volumoso para a seca",
+  convite: "Convite",
 };
-const ACOES_USO = { abrir: "Abriu", calcular: "Calculou", pdf: "Exportou PDF" };
+const ACOES_USO = { abrir: "Abriu", calcular: "Calculou", pdf: "Exportou PDF", enviar: "Enviou" };
 const MAX_EVENTOS_ENVIO = 100;
 const MAX_ENVIOS_HORA = 60; // por celular
 

@@ -11,7 +11,7 @@ import {
   sessaoAtual,
   sair,
 } from "./ui/login.js";
-import { registrarUso, enviarUso } from "./uso.js";
+import { registrarUso, enviarUso, versaoApp } from "./uso.js";
 import "./ui/rebanho.js";
 import "./ui/previsao.js";
 import "./ui/corte.js";
@@ -140,6 +140,14 @@ document.addEventListener("visibilitychange", () => {
 
 navegar();
 
+async function mostrarVersao() {
+  const versao = await versaoApp();
+  if (!versao) return;
+  $("versaoApp").textContent = `Versão ${versao.replace("ateg-cal-v", "")}`;
+  $("versaoApp").hidden = false;
+}
+mostrarVersao();
+
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   // Quando uma versão nova do app assume, recarrega uma vez para mostrar as mudanças.
   // Na primeira instalação não há controle anterior, então não recarrega.
@@ -162,6 +170,7 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
     })
     .then(() => {
       $("capaOffline").hidden = false;
+      mostrarVersao();
     })
     .catch(() => {
       // Sem service worker o app funciona normalmente, só não fica offline.

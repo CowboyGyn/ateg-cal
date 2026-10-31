@@ -1,6 +1,6 @@
 // Cache dos arquivos do app para uso offline no campo.
 // Ao alterar qualquer arquivo listado, incremente a versão.
-const VERSAO = "ateg-cal-v25";
+const VERSAO = "ateg-cal-v26";
 const ARQUIVOS = [
   "./",
   "index.html",
@@ -34,7 +34,10 @@ const ARQUIVOS = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));
+  // A versão na URL evita o cache do navegador e do GitHub, que podem misturar arquivos de versões
+  // diferentes (o fetch abaixo ignora esse parâmetro).
+  const urls = ARQUIVOS.map((a) => `${a}?v=${VERSAO}`);
+  e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(urls)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {

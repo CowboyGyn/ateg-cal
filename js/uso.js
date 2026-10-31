@@ -37,7 +37,7 @@ export function registrarUso(modulo, acao) {
 }
 
 // A versão em uso é o nome do cache do service worker (ex.: "ateg-cal-v15").
-async function versaoApp() {
+export async function versaoApp() {
   try {
     return (await caches.keys()).find((k) => k.startsWith("ateg-cal-")) ?? "";
   } catch {

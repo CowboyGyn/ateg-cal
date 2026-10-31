@@ -172,6 +172,16 @@ button.primario:disabled { opacity: 0.7; cursor: progress; }
 .check input { width: 22px; min-height: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--verde); }
 .check a { color: var(--verde); font-weight: 600; }
 .link-termos { display: block; margin: 18px auto 4px; color: var(--texto-suave); font-size: 0.85rem; text-align: center; }
+.rodape-app {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  margin: 10px 0 6px;
+  color: var(--texto-suave);
+  font-size: 0.75rem;
+}
+.rodape-marca { display: flex; align-items: center; gap: 5px; }
+.rodape-marca img { border-radius: 4px; }
 .termos { line-height: 1.55; }
 .termos h2 { margin: 0; font-size: 1.2rem; }
 .termos .sub { margin: 4px 0 8px; color: var(--texto-suave); font-size: 0.85rem; }

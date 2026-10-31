@@ -23,9 +23,16 @@
  *   1.6.0 — 31/10/2026 — cadastro exige celular completo (DDD + 9 + 8 dígitos).
  *   1.7.0 — 31/10/2026 — cadastro recusa e-mail já usado por outro cadastro.
  *   1.8.0 — 31/10/2026 — contagem de uso do módulo "Ágio de animais".
+ *   1.9.0 — 31/10/2026 — novo cadastro entra logo após o último celular, sem deixar
+ *                        linhas vazias quando há algo solto abaixo da tabela; a aba
+ *                        ganha linhas novas quando as existentes acabam.
+ *   1.10.0 — 31/10/2026 — erro interno vira resposta com a mensagem, em vez de falha de
+ *                        conexão no app.
+ *   1.11.0 — 31/10/2026 — cadastro e aceite não mudam o formato das células: a tabela
+ *                        da planilha recusa isso em colunas com tipo.
  */
 
-const VERSAO = "1.8.0";
+const VERSAO = "1.11.0";
 const PLANILHA_ID = "1SFTDBS8Jiz3yPBbbdkgb8MkWZCbKU9Ed8wjDxNR7pAA";
 const ABA = ""; // vazio = primeira aba
 const MAX_TENTATIVAS = 5;
@@ -76,10 +83,16 @@ function doPost(e) {
   } catch (err) {
     return responder({ ok: false, erro: "Requisição inválida." });
   }
-  if (dados.acao === "login") return responder(login(String(dados.celular || ""), String(dados.senha || "")));
-  if (dados.acao === "cadastro") return responder(cadastrar(dados));
-  if (dados.acao === "uso") return responder(registrarUso(dados));
-  if (dados.acao === "aceite") return responder(registrarAceite(dados));
+  // Sem isto, um erro devolve uma página do Google e o app só diz "Não foi possível conectar".
+  try {
+    if (dados.acao === "login") return responder(login(String(dados.celular || ""), String(dados.senha || "")));
+    if (dados.acao === "cadastro") return responder(cadastrar(dados));
+    if (dados.acao === "uso") return responder(registrarUso(dados));
+    if (dados.acao === "aceite") return responder(registrarAceite(dados));
+  } catch (err) {
+    console.error("Erro em " + dados.acao + ": " + (err.stack || err));
+    return responder({ ok: false, erro: "Erro no servidor: " + err.message });
+  }
   return responder({ ok: false, erro: "Ação desconhecida." });
 }
 
@@ -181,7 +194,7 @@ function cadastrar(d) {
     const linha = new Array(largura).fill("");
     linha[col.nome] = novo.nome;
     linha[col.celular] = formatarCelular(chave, novo.celular);
-    linha[col.senha] = novo.senha;
+    linha[col.senha] = comoTexto(novo.senha);
     linha[col.ativo] = "sim";
     if (col.uf >= 0) {
       linha[col.municipio] = novo.municipio;
@@ -195,13 +208,12 @@ function cadastrar(d) {
     const termos = limpar(d.termos, 10);
     if (termos) {
       linha[col.termosEm] = linha[col.cadastroEm];
-      linha[col.termosVersao] = termos;
+      linha[col.termosVersao] = comoTexto(termos);
     }
 
-    const numLinha = aba.getLastRow() + 1;
-    const intervalo = aba.getRange(numLinha, 1, 1, largura);
-    intervalo.setNumberFormat("@"); // texto simples: senha "0123" continua "0123"
-    intervalo.setValues([linha]);
+    const numLinha = proximaLinha(aba, col);
+    garantirLinhas(aba, numLinha);
+    aba.getRange(numLinha, 1, 1, largura).setValues([linha]);
     SpreadsheetApp.flush();
   } finally {
     trava.releaseLock();
@@ -233,6 +245,17 @@ function avisarCadastro(novo) {
   }
 }
 
+// Primeira linha toda vazia depois do último celular; nunca grava sobre uma linha com conteúdo.
+function proximaLinha(aba, col) {
+  const valores = aba.getDataRange().getDisplayValues();
+  let ultima = valores.length - 1;
+  while (ultima > 0 && !String(valores[ultima][col.celular]).trim()) ultima--;
+  for (let i = ultima + 1; i < valores.length; i++) {
+    if (valores[i].every((c) => !String(c).trim())) return i + 1;
+  }
+  return valores.length + 1;
+}
+
 // ---------- Aceite dos Termos de uso ----------
 
 // O app aceita na hora (mesmo offline) e envia depois: grava a data do aceite no aparelho.
@@ -261,9 +284,9 @@ function registrarAceite(d) {
     if (!usuario) return { ok: true };
     const aba = abrirAba();
     const col = garantirColunas(aba);
-    aba.getRange(usuario.linha, col.termosEm + 1).setNumberFormat("@")
+    aba.getRange(usuario.linha, col.termosEm + 1)
       .setValue(Utilities.formatDate(quando, "America/Sao_Paulo", "dd/MM/yyyy HH:mm"));
-    aba.getRange(usuario.linha, col.termosVersao + 1).setNumberFormat("@").setValue(versao);
+    aba.getRange(usuario.linha, col.termosVersao + 1).setValue(comoTexto(versao));
     SpreadsheetApp.flush();
   } finally {
     trava.releaseLock();
@@ -311,7 +334,9 @@ function registrarUso(d) {
   if (!trava.tryLock(20000)) return { ok: false, erro: "Servidor ocupado." };
   try {
     const aba = abaUso();
-    aba.getRange(aba.getLastRow() + 1, 1, linhas.length, linhas[0].length).setValues(linhas);
+    const inicio = aba.getLastRow() + 1;
+    garantirLinhas(aba, inicio + linhas.length - 1);
+    aba.getRange(inicio, 1, linhas.length, linhas[0].length).setValues(linhas);
   } finally {
     trava.releaseLock();
   }
@@ -411,6 +436,12 @@ function garantirColunas(aba) {
   return col;
 }
 
+// Gravar além do fim da aba dá erro: cria as linhas que faltam.
+function garantirLinhas(aba, ultimaLinha) {
+  const maximo = aba.getMaxRows();
+  if (ultimaLinha > maximo) aba.insertRowsAfter(maximo, ultimaLinha - maximo);
+}
+
 // ---------- Utilidades ----------
 
 // DDD + 8 últimos dígitos: "(62) 9 9117-6151", "5562991176151" e "62 9117-6151" viram "6291176151".
@@ -433,6 +464,12 @@ function formatarCelular(chave, original) {
   const tem9 = String(original).replace(/\D/g, "").replace(/^55(?=\d{11})/, "").length === 11;
   const fim = chave.slice(2);
   return "(" + chave.slice(0, 2) + ") " + (tem9 ? "9 " : "") + fim.slice(0, 4) + "-" + fim.slice(4);
+}
+
+// O apóstrofo mantém o valor como texto ("0123", "1.0"). A tabela da planilha não aceita
+// setNumberFormat em coluna com tipo, e o erro só aparece na gravação seguinte.
+function comoTexto(valor) {
+  return "'" + valor;
 }
 
 function limpar(valor, max) {

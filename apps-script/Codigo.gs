@@ -18,7 +18,8 @@
  *   1.3.0 — 28/10/2026 — aceite dos Termos de uso: colunas "Termos aceitos em" e
  *                        "Versão dos termos", gravadas no cadastro e pela ação "aceite".
  *   1.4.0 — 29/10/2026 — contagem de uso do módulo "Volumoso para a seca".
- *   1.5.0 — 31/10/2026 — contagem dos convites enviados pelo WhatsApp.
+ *   1.5.0 — 31/10/2026 — contagem dos convites enviados pelo WhatsApp; fórmulas do
+ *                        "Resumo de uso" corrigidas para planilha em português.
  */
 
 const VERSAO = "1.5.0";
@@ -321,9 +322,11 @@ function abaUso() {
 }
 
 // Aba de resumo com fórmulas: atualiza sozinha a cada novo registro.
+// Se a aba já existe, regrava as fórmulas (testarLeitura usa isso para corrigir).
 function criarResumo(planilha) {
-  if (planilha.getSheetByName(ABA_RESUMO)) return;
-  const r = planilha.insertSheet(ABA_RESUMO, planilha.getNumSheets());
+  const r = planilha.getSheetByName(ABA_RESUMO) || planilha.insertSheet(ABA_RESUMO, planilha.getNumSheets());
+  // Em planilha em português, os argumentos das fórmulas são separados por ponto e vírgula.
+  const s = String(planilha.getSpreadsheetLocale()).startsWith("pt") ? ";" : ",";
   r.getRange("A1").setValue("Resumo de uso do ATeG Cal").setFontWeight("bold").setFontSize(14);
 
   r.getRange("A3:A5").setValues([
@@ -331,27 +334,33 @@ function criarResumo(planilha) {
     ["Usuários diferentes nos últimos 30 dias"],
     ["Usuários diferentes desde o início"],
   ]);
-  r.getRange("B3").setFormula("=IFERROR(COUNTUNIQUE(FILTER(Uso!C2:C, Uso!A2:A >= TODAY() - 7)), 0)");
-  r.getRange("B4").setFormula("=IFERROR(COUNTUNIQUE(FILTER(Uso!C2:C, Uso!A2:A >= TODAY() - 30)), 0)");
+  r.getRange("B3").setFormula("=IFERROR(COUNTUNIQUE(FILTER(Uso!C2:C" + s + " Uso!A2:A >= TODAY() - 7))" + s + " 0)");
+  r.getRange("B4").setFormula("=IFERROR(COUNTUNIQUE(FILTER(Uso!C2:C" + s + " Uso!A2:A >= TODAY() - 30))" + s + " 0)");
   r.getRange("B5").setFormula("=COUNTUNIQUE(Uso!C2:C)");
+
+  const consulta = (texto) => "=IFERROR(QUERY(Uso!A:F" + s + " \"" + texto + "\"" + s + " 1)" + s + " \"Sem dados ainda\")";
 
   r.getRange("A7").setValue("Por módulo (quantas vezes)").setFontWeight("bold");
   r.getRange("A8").setFormula(
-    "=IFERROR(QUERY(Uso!A:F, \"select D, count(A) where D is not null group by D pivot E label D 'Módulo'\", 1), \"Sem dados ainda\")",
+    consulta("select D, count(A) where D is not null group by D pivot E label D 'Módulo'"),
   );
 
   r.getRange("G7").setValue("Por mês").setFontWeight("bold");
   r.getRange("G8").setFormula(
-    "=IFERROR(QUERY(Uso!A:F, \"select year(A), month(A) + 1, count(A) where A is not null " +
-      "group by year(A), month(A) + 1 order by year(A), month(A) + 1 " +
-      "label year(A) 'Ano', month(A) + 1 'Mês', count(A) 'Ações'\", 1), \"Sem dados ainda\")",
+    consulta(
+      "select year(A), month(A) + 1, count(A) where A is not null " +
+        "group by year(A), month(A) + 1 order by year(A), month(A) + 1 " +
+        "label year(A) 'Ano', month(A) + 1 'Mês', count(A) 'Ações'",
+    ),
   );
 
   r.getRange("K7").setValue("Por usuário (mais ativos primeiro)").setFontWeight("bold");
   r.getRange("K8").setFormula(
-    "=IFERROR(QUERY(Uso!A:F, \"select B, C, count(A), max(A) where C is not null group by B, C " +
-      "order by count(A) desc label B 'Nome', C 'Celular', count(A) 'Ações', max(A) 'Último uso' " +
-      "format max(A) 'dd/mm/yyyy'\", 1), \"Sem dados ainda\")",
+    consulta(
+      "select B, C, count(A), max(A) where C is not null group by B, C " +
+        "order by count(A) desc label B 'Nome', C 'Celular', count(A) 'Ações', max(A) 'Último uso' " +
+        "format max(A) 'dd/mm/yyyy'",
+    ),
   );
   r.setColumnWidth(1, 280);
 }
@@ -429,4 +438,6 @@ function testarLeitura() {
   Logger.log("ATeG Cal login v" + VERSAO + " — planilha: " + aba.getParent().getName() + " — linhas: " + aba.getLastRow());
   Logger.log("Cota de e-mails restante hoje: " + MailApp.getRemainingDailyQuota());
   Logger.log("Aba de uso pronta: " + abaUso().getName());
+  criarResumo(aba.getParent());
+  Logger.log("Resumo de uso atualizado — idioma da planilha: " + aba.getParent().getSpreadsheetLocale());
 }

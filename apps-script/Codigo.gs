@@ -21,9 +21,10 @@
  *   1.5.0 — 31/10/2026 — contagem dos convites enviados pelo WhatsApp; fórmulas do
  *                        "Resumo de uso" corrigidas para planilha em português.
  *   1.6.0 — 31/10/2026 — cadastro exige celular completo (DDD + 9 + 8 dígitos).
+ *   1.7.0 — 31/10/2026 — cadastro recusa e-mail já usado por outro cadastro.
  */
 
-const VERSAO = "1.6.0";
+const VERSAO = "1.7.0";
 const PLANILHA_ID = "1SFTDBS8Jiz3yPBbbdkgb8MkWZCbKU9Ed8wjDxNR7pAA";
 const ABA = ""; // vazio = primeira aba
 const MAX_TENTATIVAS = 5;
@@ -129,6 +130,13 @@ function buscarUsuario(chave) {
   return null;
 }
 
+function emailCadastrado(email) {
+  const valores = abrirAba().getDataRange().getDisplayValues();
+  const col = localizarColunas(valores[0]);
+  if (col.email < 0) return false;
+  return valores.slice(1).some((linha) => String(linha[col.email]).trim().toLowerCase() === email);
+}
+
 // ---------- Cadastro (primeiro acesso) ----------
 
 function cadastrar(d) {
@@ -161,6 +169,9 @@ function cadastrar(d) {
   try {
     if (buscarUsuario(chave)) {
       return { ok: false, erro: "Este celular já está cadastrado. Use “Entrar” ou “Esqueci a senha”." };
+    }
+    if (emailCadastrado(novo.email)) {
+      return { ok: false, erro: "Este e-mail já está cadastrado. Use “Entrar” ou “Esqueci a senha”." };
     }
     const aba = abrirAba();
     const col = garantirColunas(aba);

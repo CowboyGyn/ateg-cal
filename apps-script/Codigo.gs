@@ -22,9 +22,10 @@
  *                        "Resumo de uso" corrigidas para planilha em português.
  *   1.6.0 — 31/10/2026 — cadastro exige celular completo (DDD + 9 + 8 dígitos).
  *   1.7.0 — 31/10/2026 — cadastro recusa e-mail já usado por outro cadastro.
+ *   1.8.0 — 31/10/2026 — contagem de uso do módulo "Ágio de animais".
  */
 
-const VERSAO = "1.7.0";
+const VERSAO = "1.8.0";
 const PLANILHA_ID = "1SFTDBS8Jiz3yPBbbdkgb8MkWZCbKU9Ed8wjDxNR7pAA";
 const ABA = ""; // vazio = primeira aba
 const MAX_TENTATIVAS = 5;
@@ -57,6 +58,7 @@ const MODULOS_USO = {
   "previsao-leite": "Previsão de leite",
   "rebanho-corte": "Rebanho ideal — corte",
   "volumoso-seca": "Volumoso para a seca",
+  agio: "Ágio de animais",
   convite: "Convite",
 };
 const ACOES_USO = { abrir: "Abriu", calcular: "Calculou", pdf: "Exportou PDF", enviar: "Enviou" };

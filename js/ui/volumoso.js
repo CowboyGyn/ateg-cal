@@ -12,6 +12,7 @@ import {
 import {
   $,
   fmt,
+  numero,
   escapar,
   cabecalhoRelatorio,
   premissasRelatorio,
@@ -36,12 +37,6 @@ const listaVolumosos = $("listaVolumosos");
 
 const reais = (v, casas = 0) => `R$ ${fmt(v, casas)}`;
 const toneladas = (v) => fmt(v, v > 0 && v < 10 ? 1 : 0);
-
-// "" → null (usa a referência); aceita vírgula decimal.
-function numero(texto) {
-  const bruto = String(texto ?? "").trim().replace(",", ".");
-  return bruto === "" ? null : Number(bruto);
-}
 
 // ---------- Formulário: meses ----------
 

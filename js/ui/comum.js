@@ -18,6 +18,12 @@ export function fmtAnimais(v, nome = "novilha") {
 export const escapar =(s) =>
   String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
+// "" → null (usa a referência); aceita vírgula decimal.
+export function numero(texto) {
+  const bruto = String(texto ?? "").trim().replace(",", ".");
+  return bruto === "" ? null : Number(bruto);
+}
+
 export const dataHoje = () => new Date().toLocaleDateString("pt-BR");
 
 // Avisa o app que um módulo foi usado (a contagem de uso fica em js/uso.js).

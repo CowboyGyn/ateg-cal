@@ -251,6 +251,90 @@
       </template>
     </section>
 
+    <!-- Ágio de animais -->
+    <section id="tela-agio" class="tela" hidden>
+      <form id="formAgio" novalidate>
+        <div class="cartao">
+          <label class="campo">
+            <span>Propriedade</span>
+            <input name="fazenda" type="text" autocomplete="off" placeholder="Nome da fazenda">
+          </label>
+          <div class="grade">
+            <label class="campo"><span>Arroba do boi gordo (R$/@)</span>
+              <input name="arrobaBoi" type="number" inputmode="decimal" min="0" step="0.01" required></label>
+            <label class="campo"><span>Ágio máximo aceito (%)</span>
+              <input name="agioLimitePct" type="number" inputmode="decimal" step="0.1"></label>
+          </div>
+          <a class="link-cotacao" href="https://www.scotconsultoria.com.br/cotacoes/boi-gordo/" target="_blank" rel="noopener">Ver cotação na Scot Consultoria</a>
+          <p class="nota">Digite a arroba da sua praça. Ágio máximo vazio usa 33%, média de 2014 a 2024 citada pela Scot; é uma referência, não uma regra.</p>
+        </div>
+
+        <div class="cartao">
+          <div class="cartao-titulo">
+            <strong>Animais a comprar</strong>
+            <span>Adicione mais de uma categoria para comparar. Peso vazio usa a referência.</span>
+          </div>
+          <div id="listaAgio" class="lista-itens"></div>
+          <button type="button" id="btnAddAgio" class="link">+ Adicionar categoria</button>
+        </div>
+
+        <div class="cartao">
+          <details id="blocoCustosAgio" class="pesos">
+            <summary>Até quanto pagar pelos custos (opcional)</summary>
+            <p class="nota">Parte da venda futura e desconta custos e margem. Preencha ao menos o custo por dia.</p>
+            <div class="grade">
+              <label class="campo"><span>Custo (R$/animal/dia)</span>
+                <input name="custoDia" type="number" inputmode="decimal" min="0" step="0.01"></label>
+              <label class="campo"><span>Ganho de peso (kg/dia)</span>
+                <input name="gmdKg" type="number" inputmode="decimal" min="0" step="0.01"></label>
+              <label class="campo"><span>Peso de venda (kg)</span>
+                <input name="pesoVendaKg" type="number" inputmode="numeric" min="0" step="1"></label>
+              <label class="campo"><span>Rendimento de carcaça (%)</span>
+                <input name="rendimentoPct" type="number" inputmode="decimal" min="0" max="70" step="0.1"></label>
+              <label class="campo"><span>Arroba de venda (R$/@)</span>
+                <input name="arrobaVenda" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Igual à de hoje"></label>
+              <label class="campo"><span>Mortalidade (%)</span>
+                <input name="mortalidadePct" type="number" inputmode="decimal" min="0" max="99" step="0.1"></label>
+              <label class="campo"><span>Frete e comissão (R$/animal)</span>
+                <input name="freteAnimal" type="number" inputmode="decimal" min="0" step="1"></label>
+              <label class="campo"><span>Margem desejada (R$/animal)</span>
+                <input name="margemAnimal" type="number" inputmode="decimal" min="0" step="1"></label>
+              <label class="campo"><span>Juros (% ao mês)</span>
+                <input name="jurosMesPct" type="number" inputmode="decimal" min="0" step="0.1"></label>
+            </div>
+          </details>
+        </div>
+
+        <p id="erroAgio" class="erro" role="alert" hidden></p>
+
+        <div class="acoes">
+          <button type="submit" class="primario">Calcular</button>
+          <button type="button" id="btnLimparAgio" class="secundario">Limpar</button>
+        </div>
+      </form>
+
+      <div id="resultadoAgio" class="resultado" hidden></div>
+
+      <template id="modeloAgio">
+        <div class="item">
+          <div class="item-topo">
+            <select data-campo="tipo" aria-label="Categoria"></select>
+            <button type="button" class="remover" aria-label="Remover categoria">&#10005;</button>
+          </div>
+          <div class="grade">
+            <label class="campo"><span>Animais</span>
+              <input data-campo="animais" type="number" inputmode="numeric" min="1" step="1" placeholder="1"></label>
+            <label class="campo"><span>Peso (kg)</span>
+              <input data-campo="pesoKg" type="number" inputmode="numeric" step="1"></label>
+            <label class="campo"><span>Preço em</span>
+              <select data-campo="forma"></select></label>
+            <label class="campo"><span>Preço (R$)</span>
+              <input data-campo="preco" type="number" inputmode="decimal" min="0" step="0.01"></label>
+          </div>
+        </div>
+      </template>
+    </section>
+
     <!-- Termos de uso e Política de privacidade (leitura e aceite) -->
     <section id="tela-termos" class="tela" hidden>
       <div id="avisoAceite" class="aviso atencao" hidden>
@@ -414,6 +498,17 @@
             <span class="modulo-tag">Leite e corte</span>
             <strong>Volumoso para a seca</strong>
             <span class="modulo-desc">Silagem, cana, feno: quanto produzir, área, silo e custo.</span>
+          </span>
+          <span class="modulo-seta" aria-hidden="true">&#8250;</span>
+        </a>
+        <a class="modulo corte" href="#/agio">
+          <span class="modulo-icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M19 5L5 19"/><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+          </span>
+          <span class="modulo-corpo">
+            <span class="modulo-tag">Corte</span>
+            <strong>Ágio de animais</strong>
+            <span class="modulo-desc">Compare a reposição com a arroba do boi gordo e veja até quanto pagar.</span>
           </span>
           <span class="modulo-seta" aria-hidden="true">&#8250;</span>
         </a>

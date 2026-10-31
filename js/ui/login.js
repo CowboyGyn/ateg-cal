@@ -86,6 +86,12 @@ function formatarCelular(valor) {
   return `(${ddd}) ${resto.slice(0, 4)}-${resto.slice(4)}`;
 }
 
+// Cadastro novo: DDD + 9 + 8 dígitos. O login aceita também os números antigos, sem o 9.
+function celularCompleto(valor) {
+  const d = valor.replace(/\D/g, "").replace(/^55(?=\d{11})/, "").replace(/^0/, "");
+  return /^[1-9]{2}9\d{8}$/.test(d);
+}
+
 async function chamarScript(dados) {
   const controle = new AbortController();
   const limite = setTimeout(() => controle.abort(), TEMPO_LIMITE_MS);
@@ -261,7 +267,7 @@ export function iniciarLogin(aoEntrar) {
       f[campo].focus();
     };
     if (dados.nome.split(" ").filter(Boolean).length < 2) return falha("Informe o nome completo.", "nome");
-    if (dados.celular.replace(/\D/g, "").length < 10) return falha("Informe o celular com DDD.", "celular");
+    if (!celularCompleto(dados.celular)) return falha("Informe o celular completo, com DDD e o 9 na frente: (62) 9 0000-0000.", "celular");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dados.email)) return falha("Informe um e-mail válido.", "email");
     if (!dados.municipio) return falha("Selecione o município.", "municipio");
     if (!dados.funcao) return falha("Selecione a função.", "funcao");

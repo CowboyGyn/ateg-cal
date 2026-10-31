@@ -20,9 +20,10 @@
  *   1.4.0 — 29/10/2026 — contagem de uso do módulo "Volumoso para a seca".
  *   1.5.0 — 31/10/2026 — contagem dos convites enviados pelo WhatsApp; fórmulas do
  *                        "Resumo de uso" corrigidas para planilha em português.
+ *   1.6.0 — 31/10/2026 — cadastro exige celular completo (DDD + 9 + 8 dígitos).
  */
 
-const VERSAO = "1.5.0";
+const VERSAO = "1.6.0";
 const PLANILHA_ID = "1SFTDBS8Jiz3yPBbbdkgb8MkWZCbKU9Ed8wjDxNR7pAA";
 const ABA = ""; // vazio = primeira aba
 const MAX_TENTATIVAS = 5;
@@ -143,7 +144,7 @@ function cadastrar(d) {
   const chave = chaveCelular(novo.celular);
 
   if (novo.nome.length < 3) return { ok: false, erro: "Informe o nome completo." };
-  if (!chave) return { ok: false, erro: "Informe o celular com DDD." };
+  if (!celularCompleto(novo.celular)) return { ok: false, erro: "Informe o celular completo, com DDD e o 9 na frente: (62) 9 0000-0000." };
   if (novo.senha.length < 4 || novo.senha.length > 40) return { ok: false, erro: "A senha deve ter de 4 a 40 caracteres." };
   if (!novo.municipio || !/^[A-Z]{2}$/.test(novo.uf)) return { ok: false, erro: "Informe o município e a UF." };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(novo.email)) return { ok: false, erro: "Informe um e-mail válido." };
@@ -406,6 +407,12 @@ function chaveCelular(valor) {
   if (d.indexOf("0") === 0) d = d.slice(1);
   if (d.length < 10) return "";
   return d.slice(0, 2) + d.slice(-8);
+}
+
+// Cadastro novo: DDD + 9 + 8 dígitos. O login aceita também os números antigos, sem o 9.
+function celularCompleto(valor) {
+  const d = String(valor).replace(/\D/g, "").replace(/^55(?=\d{11})/, "").replace(/^0/, "");
+  return /^[1-9]{2}9\d{8}$/.test(d);
 }
 
 // Grava o celular sempre no formato (62) 9 9117-6151.
